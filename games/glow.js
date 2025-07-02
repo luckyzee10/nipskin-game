@@ -46,6 +46,9 @@ function keyUp(e){
 // Shooting control
 let canShoot = true;
 
+// mobile buttons
+let leftBtn,rightBtn,jumpBtn;
+
 function spawnEnemy(){
   const scale = 0.8 + Math.random()*0.6; // 0.8x - 1.4x size
   const w = ENEMY_BASE_W*scale;
@@ -62,6 +65,30 @@ function spawnDiamond(){
 function start(){
   canvas=document.getElementById('gameCanvas');
   ctx=canvas.getContext('2d');
+  // mobile button refs
+  leftBtn=document.getElementById('leftBtn');
+  rightBtn=document.getElementById('rightBtn');
+  jumpBtn=document.getElementById('jumpBtn');
+
+  const onLeftDown=()=>keys.left=true;
+  const onLeftUp=()=>keys.left=false;
+  const onRightDown=()=>keys.right=true;
+  const onRightUp=()=>keys.right=false;
+  const onShootDown=()=>keys.shoot=true;
+  const onShootUp=()=>keys.shoot=false;
+
+  leftBtn.addEventListener('pointerdown',onLeftDown);
+  leftBtn.addEventListener('pointerup',onLeftUp);
+  rightBtn.addEventListener('pointerdown',onRightDown);
+  rightBtn.addEventListener('pointerup',onRightUp);
+  jumpBtn.addEventListener('pointerdown',onShootDown);
+  jumpBtn.addEventListener('pointerup',onShootUp);
+
+  start._listeners=[
+    [leftBtn,'pointerdown',onLeftDown],[leftBtn,'pointerup',onLeftUp],
+    [rightBtn,'pointerdown',onRightDown],[rightBtn,'pointerup',onRightUp],
+    [jumpBtn,'pointerdown',onShootDown],[jumpBtn,'pointerup',onShootUp]
+  ];
   reset();
   document.addEventListener('keydown',keyDown);
   document.addEventListener('keyup',keyUp);
@@ -72,6 +99,7 @@ function stop(){
   cancelAnimationFrame(rafId);
   document.removeEventListener('keydown',keyDown);
   document.removeEventListener('keyup',keyUp);
+  if(start._listeners){ start._listeners.forEach(([el,ev,fn])=>el.removeEventListener(ev,fn)); }
 }
 function reset(){
   player.x = canvas.width/2-PLAYER_W/2;

@@ -42,6 +42,10 @@ async function launchBloom(){
     header.querySelector('.game-title').textContent = '🌸 BLOOM BOSS 🌸';
     header.querySelector('.score').style.display = 'none';
 
+    // Hide on-screen button controls; Bloom uses joystick
+    document.querySelector('.game-controls').style.display = 'none';
+    document.getElementById('jumpBtn').innerText = 'JUMP!';
+
     currentStop = typeof mod.stop==='function'? mod.stop: null;
     mod.start();
     restartBtn.onclick = ()=>{ if(currentStop){currentStop();} launchBloom(); };
@@ -69,6 +73,9 @@ async function launchDream(){
   header.querySelector('.game-title').textContent = '⭐ DREAM CHASER! ⭐';
   header.querySelector('.score').style.display = 'inline-block';
 
+  // In launchDream within function launchDream before mod.start maybe restore JUMP
+  document.getElementById('jumpBtn').innerText = 'JUMP!';
+
   if(typeof mod.start==='function') mod.start();
   currentStop = typeof mod.stop==='function'? mod.stop : null;
 
@@ -90,12 +97,17 @@ async function launchGlow(){
   showGame(true);
   document.getElementById('gameOver').classList.add('hidden');
   document.getElementById('startBtn').classList.add('hidden');
+  // Show controls for Glow Getter (left/right/shoot)
+  document.querySelector('.game-controls').style.display='flex';
 
   // Update header for Glow Getter
   const header = document.querySelector('.game-header');
   header.style.display='block';
   header.querySelector('.game-title').textContent = '✨ GLOW GETTER ✨';
   header.querySelector('.score').style.display = 'inline-block';
+
+  // In launchGlow, change jumpBtn text
+  document.getElementById('jumpBtn').innerText = 'SHOOT!';
 
   if(typeof mod.start==='function') mod.start();
   currentStop = typeof mod.stop==='function'? mod.stop:null;
@@ -118,6 +130,9 @@ function returnToMenu(){
   mainMenu.style.display='flex';
   clearSelection();
   restartBtn.onclick = defaultRestart;
+
+  // In returnToMenu restore JUMP text
+  document.getElementById('jumpBtn').innerText = 'JUMP!';
 }
 
 // ensure menu visible on load

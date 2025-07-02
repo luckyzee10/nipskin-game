@@ -51,6 +51,13 @@ imgBg.onload = () => {
 
 // controls
 const keys = {left:false,right:false,up:false,down:false};
+
+// mobile buttons (unused joystick mode)
+let leftBtn,rightBtn,jumpBtn;
+// joystick listeners
+let pointerActive=false;
+let pointerId=null;
+
 function keyDown(e){
   if(['ArrowLeft','a','A'].includes(e.key)){ keys.left=true;}
   if(['ArrowRight','d','D'].includes(e.key)){ keys.right=true;}
@@ -135,6 +142,42 @@ function start(){
     }
   }
 
+  // Virtual joystick on canvas
+  const rect = canvas.getBoundingClientRect();
+  const thresh = 20; // deadzone
+
+  function processPointer(e){
+    if(!pointerActive) return;
+    let x=e.clientX - rect.left;
+    let y=e.clientY - rect.top;
+    let cx=rect.width/2;
+    let cy=rect.height/2;
+    let dx=x-cx;
+    let dy=y-cy;
+    keys.left = dx < -thresh;
+    keys.right= dx >  thresh;
+    keys.up   = dy < -thresh;
+    keys.down = dy >  thresh;
+  }
+
+  function onJoyStart(e){
+    pointerActive=true;
+    pointerId=e.pointerId;
+    processPointer(e);
+  }
+  function onJoyMove(e){ if(e.pointerId===pointerId) processPointer(e); }
+  function onJoyEnd(e){ if(e.pointerId===pointerId){ pointerActive=false; clearKeys(); } }
+
+  canvas.addEventListener('pointerdown',onJoyStart);
+  canvas.addEventListener('pointermove',onJoyMove);
+  canvas.addEventListener('pointerup',onJoyEnd);
+  canvas.addEventListener('pointercancel',onJoyEnd);
+
+  start._listeners=[
+    [canvas,'pointerdown',onJoyStart],[canvas,'pointermove',onJoyMove],
+    [canvas,'pointerup',onJoyEnd],[canvas,'pointercancel',onJoyEnd]
+  ];
+
   loop();
 }
 
@@ -142,6 +185,8 @@ function stop(){
   cancelAnimationFrame(rafId);
   document.removeEventListener('keydown',keyDown);
   document.removeEventListener('keyup',keyUp);
+  // remove touch listeners
+  if(start._listeners){ start._listeners.forEach(([el,ev,fn])=>el.removeEventListener(ev,fn)); }
   clearKeys();
 }
 
