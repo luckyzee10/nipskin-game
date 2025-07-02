@@ -45,6 +45,8 @@ async function launchBloom(){
     // Hide on-screen button controls; Bloom uses joystick
     document.querySelector('.game-controls').style.display = 'none';
     document.getElementById('jumpBtn').innerText = 'JUMP!';
+    // reset canvas margin
+    document.getElementById('gameCanvas').style.marginBottom = '0px';
 
     currentStop = typeof mod.stop==='function'? mod.stop: null;
     mod.start();
@@ -72,6 +74,9 @@ async function launchDream(){
   header.style.display = 'block';
   header.querySelector('.game-title').textContent = '⭐ DREAM CHASER! ⭐';
   header.querySelector('.score').style.display = 'inline-block';
+  // show controls and reset canvas margin
+  document.querySelector('.game-controls').style.display='flex';
+  document.getElementById('gameCanvas').style.marginBottom = '0px';
 
   // In launchDream within function launchDream before mod.start maybe restore JUMP
   document.getElementById('jumpBtn').innerText = 'JUMP!';
@@ -99,6 +104,8 @@ async function launchGlow(){
   document.getElementById('startBtn').classList.add('hidden');
   // Show controls for Glow Getter (left/right/shoot)
   document.querySelector('.game-controls').style.display='flex';
+  // lift canvas so controls do not cover player
+  document.getElementById('gameCanvas').style.marginBottom = '120px';
 
   // Update header for Glow Getter
   const header = document.querySelector('.game-header');
@@ -130,6 +137,8 @@ function returnToMenu(){
   mainMenu.style.display='flex';
   clearSelection();
   restartBtn.onclick = defaultRestart;
+  // reset canvas margin
+  document.getElementById('gameCanvas').style.marginBottom = '0px';
 
   // In returnToMenu restore JUMP text
   document.getElementById('jumpBtn').innerText = 'JUMP!';
