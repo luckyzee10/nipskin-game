@@ -282,7 +282,8 @@ function endGame(){
   if(final) final.textContent=score;
   const gov=document.getElementById('gameOver');
   if(gov) gov.classList.remove('hidden');
-  stop();
+  // pause loop but keep context; listeners remain so restart works
+  cancelAnimationFrame(rafId);
 }
 
 // helper to activate cacti based on score
