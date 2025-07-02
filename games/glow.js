@@ -236,6 +236,15 @@ function triggerLose(){
   gameOver=true;
   const final=document.getElementById('finalScore'); if(final) final.textContent=score;
   const gov=document.getElementById('gameOver'); if(gov) gov.classList.remove('hidden');
+  const restart=document.getElementById('restartBtn');
+  const menu=document.getElementById('menuBtn');
+  if(restart){
+    restart.onclick = ()=>{
+      gov.classList.add('hidden');
+      reset();
+    };
+  }
+  if(menu){ menu.onclick = ()=>{ window.returnToMenu && window.returnToMenu(); }; }
 }
 
 export {start, stop}; 

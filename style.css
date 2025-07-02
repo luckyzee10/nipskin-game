@@ -170,6 +170,13 @@ body {
     margin-bottom: 15px;
 }
 
+/* Add spacing for stacked buttons in Game Over overlay */
+.game-over .restart-btn {
+    display: block;
+    width: 100%;
+    margin: 11px 0;
+}
+
 .hidden {
     display: none;
 }

@@ -133,15 +133,6 @@ window.addEventListener('DOMContentLoaded', () => {
     clearCharacterSelection();
 });
 
-// After game over, return to menu on restart
-restartBtn.addEventListener('click', () => {
-    setTimeout(() => {
-        mainMenu.style.display = 'flex';
-        showGameUI(false);
-        clearCharacterSelection();
-    }, 500);
-});
-
 // Back to menu button logic
 backToMenuBtn.addEventListener('click', () => {
     mainMenu.style.display = 'flex';
@@ -674,11 +665,25 @@ function gameOver() {
     // Hide start button so only PLAY AGAIN shows
     startBtn.classList.add('hidden');
     document.querySelector('.game-ui').style.display = 'block';
+
+    // Re-attach PLAY AGAIN and MAIN MENU behaviour without duplicate listeners
+    const restart = document.getElementById('restartBtn');
+    const menu = document.getElementById('menuBtn');
+    if (restart) {
+        restart.onclick = () => {
+            gameOverDiv.classList.add('hidden');
+            startGame();
+        };
+    }
+    if (menu) {
+        menu.onclick = () => {
+            window.returnToMenu && window.returnToMenu();
+        };
+    }
 }
 
 // Control event listeners
 startBtn.addEventListener('click', startGame);
-restartBtn.addEventListener('click', startGame);
 
 // Touch controls
 leftBtn.addEventListener('touchstart', (e) => {

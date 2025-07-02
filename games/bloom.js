@@ -112,9 +112,37 @@ let cactiActivated = 0;
 let lastCactusSpawn = 0;
 const CACTUS_SPAWN_INTERVAL = 5000; // ms
 
+// ---- Helper to fully reset game state without reattaching listeners ----
+function reset(){
+  clearKeys();
+  score = 0;
+  flowers.length = 0;
+  cacti.length = 0;
+  for(let i=0;i<5;i++) spawnFlower();
+  for(let i=0;i<3;i++) spawnCactus();
+  cactiActivated = 0;
+  lastCactusSpawn = Date.now();
+  gameOver = false;
+  player.x = 180;
+  player.y = 280;
+  player.vx = 0;
+  player.vy = 0;
+  player.facingRight = true;
+  // Hide game-over overlay if visible
+  const gov = document.getElementById('gameOver');
+  if(gov) gov.classList.add('hidden');
+  // Update score display immediately
+  const final = document.getElementById('score');
+  if(final) final.textContent = score;
+}
+
 function start(){
   canvas = document.getElementById('gameCanvas');
   ctx = canvas.getContext('2d');
+  // mobile button refs
+  leftBtn=document.getElementById('leftBtn');
+  rightBtn=document.getElementById('rightBtn');
+  jumpBtn=document.getElementById('jumpBtn');
   clearKeys();
   score = 0;
   flowers.length=0; cacti.length=0;
@@ -282,6 +310,17 @@ function endGame(){
   if(final) final.textContent=score;
   const gov=document.getElementById('gameOver');
   if(gov) gov.classList.remove('hidden');
+  // wire buttons
+  const restart=document.getElementById('restartBtn');
+  const menu=document.getElementById('menuBtn');
+  if(restart){
+    restart.onclick = () => {
+      gov.classList.add('hidden');
+      reset();
+      rafId=requestAnimationFrame(loop);
+    };
+  }
+  if(menu){ menu.onclick = () => { window.returnToMenu && window.returnToMenu(); }; }
   // pause loop but keep context; listeners remain so restart works
   cancelAnimationFrame(rafId);
 }

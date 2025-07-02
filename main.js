@@ -2,6 +2,7 @@
 const mainMenu = document.getElementById('mainMenu');
 const backBtn   = document.getElementById('backToMenuBtn');
 const restartBtn= document.getElementById('restartBtn');
+const menuBtn   = document.getElementById('menuBtn');
 const characterRows = document.querySelectorAll('.character-row');
 
 let currentStop = null; // will hold stop() of active game
@@ -23,6 +24,7 @@ function clearSelection(){
 
 const defaultRestart= ()=>returnToMenu();
 restartBtn.onclick= defaultRestart;
+menuBtn.onclick = returnToMenu;
 
 async function launchBloom(){
   if (currentStop){ try{currentStop();}catch(e){} currentStop=null; }
@@ -128,7 +130,6 @@ async function launchGlow(){
 document.getElementById('btnGlow').addEventListener('click', ()=>launchGlow());
 
 backBtn.addEventListener('click', returnToMenu);
-restartBtn.addEventListener('click', returnToMenu);
 
 function returnToMenu(){
   if (currentStop){ try{currentStop();}catch(e){} currentStop=null; }
@@ -147,6 +148,9 @@ function returnToMenu(){
   // In returnToMenu restore JUMP text
   document.getElementById('jumpBtn').innerText = 'JUMP!';
 }
+
+// Attach to global for other game modules
+window.returnToMenu = returnToMenu;
 
 // ensure menu visible on load
 window.addEventListener('DOMContentLoaded', ()=>{
