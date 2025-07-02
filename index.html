@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Nipskin Game - Dream Chaser!</title>
+    <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+    <div class="game-container">
+        <!-- BEGINNING MENU -->
+        <div id="mainMenu" class="main-menu">
+            <img src="assets/Shine%20Up%20Logo.png" alt="Shine-Up Logo" class="menu-logo" />
+            <h2 class="menu-subtitle">CHOOSE&nbsp; YOUR&nbsp; CHARACTER</h2>
+
+            <div class="character-row" id="rowDream">
+                <img src="assets/dream%20chaser%20menu%20icon.png" alt="Dream Chaser avatar" class="character-avatar" />
+                <button class="character-btn dream-btn" data-character="dream">DREAM CHASER</button>
+            </div>
+
+            <div class="character-row" id="rowGlow">
+                <img src="assets/glow%20getter%20menu%20icon.png" alt="Glow Getter avatar" class="character-avatar" />
+                <button id="btnGlow" class="character-btn glow-btn" data-character="glow">GLOW GETTER</button>
+            </div>
+
+            <div class="character-row" id="rowBloom">
+                <img src="assets/bloom%20boss%20menu%20icon.png" alt="Bloom Boss avatar" class="character-avatar" />
+                <button id="btnBloom" class="character-btn bloom-btn" data-character="bloom">BLOOM BOSS</button>
+            </div>
+        </div>
+        <!-- END BEGINNING MENU -->
+
+        <div class="game-header">
+            <button id="backToMenuBtn" class="back-btn" style="display:none;" aria-label="Back to Menu">←</button>
+            <h1 class="game-title">⭐ DREAM CHASER! ⭐</h1>
+            <div class="score">Score: <span id="score">0</span></div>
+        </div>
+        
+        <canvas id="gameCanvas" width="360" height="640"></canvas>
+        
+        <div class="game-controls">
+            <button id="leftBtn" class="control-btn left-btn">←</button>
+            <button id="jumpBtn" class="control-btn jump-btn">JUMP!</button>
+            <button id="rightBtn" class="control-btn right-btn">→</button>
+        </div>
+        
+        <div class="game-ui">
+            <button id="startBtn" class="start-btn">START GAME</button>
+            <div id="gameOver" class="game-over hidden">
+                <h2>Game Over!</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <button id="restartBtn" class="restart-btn">PLAY AGAIN</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="main.js?v=1"></script>
+</body>
+</html> 

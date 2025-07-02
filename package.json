@@ -1,0 +1,28 @@
+{
+  "name": "nipskin-game",
+  "version": "1.0.0",
+  "description": "A phone-first web video game with 8-bit 'bratz' aesthetic - platform jumping minigame",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "npx http-server -p 8000 -o",
+    "dev": "npx live-server --port=8000"
+  },
+  "keywords": [
+    "game",
+    "web-game",
+    "mobile-game",
+    "platform-jumper",
+    "bratz",
+    "8-bit",
+    "javascript",
+    "html5",
+    "canvas"
+  ],
+  "author": "Nipskin Game Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  }
+} 
