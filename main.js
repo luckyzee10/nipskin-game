@@ -47,7 +47,7 @@ async function launchBloom(){
     document.getElementById('jumpBtn').innerText = 'JUMP!';
     // reset canvas margin
     document.getElementById('gameCanvas').style.marginBottom = '0px';
-    document.getElementById('gameCanvas').height = 640;
+    document.getElementById('gameCanvas').height = 500;
 
     currentStop = typeof mod.stop==='function'? mod.stop: null;
     mod.start();
@@ -78,7 +78,7 @@ async function launchDream(){
   // show controls and reset canvas margin
   document.querySelector('.game-controls').style.display='flex';
   document.getElementById('gameCanvas').style.marginBottom = '0px';
-  document.getElementById('gameCanvas').height = 640;
+  document.getElementById('gameCanvas').height = 500;
 
   // In launchDream within function launchDream before mod.start maybe restore JUMP
   document.getElementById('jumpBtn').innerText = 'JUMP!';
@@ -106,9 +106,9 @@ async function launchGlow(){
   document.getElementById('startBtn').classList.add('hidden');
   // Show controls for Glow Getter (left/right/shoot)
   document.querySelector('.game-controls').style.display='flex';
-  // lift canvas so controls do not cover player
-  document.getElementById('gameCanvas').style.marginBottom = '120px';
-  document.getElementById('gameCanvas').height = 540;
+  // ensure full height canvas for Glow
+  document.getElementById('gameCanvas').style.marginBottom = '0px';
+  document.getElementById('gameCanvas').height = 500;
 
   // Update header for Glow Getter
   const header = document.querySelector('.game-header');
@@ -142,7 +142,7 @@ function returnToMenu(){
   restartBtn.onclick = defaultRestart;
   // reset canvas margin
   document.getElementById('gameCanvas').style.marginBottom = '0px';
-  document.getElementById('gameCanvas').height = 640;
+  document.getElementById('gameCanvas').height = 500;
 
   // In returnToMenu restore JUMP text
   document.getElementById('jumpBtn').innerText = 'JUMP!';
