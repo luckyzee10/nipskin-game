@@ -26,6 +26,37 @@ const defaultRestart= ()=>returnToMenu();
 restartBtn.onclick= defaultRestart;
 menuBtn.onclick = returnToMenu;
 
+// ---------- Dream Chaser intro video helper ----------
+async function playDreamIntro(){
+  const overlay = document.getElementById('introOverlay');
+  const video   = document.getElementById('introVideo');
+  const skipBtn = document.getElementById('skipIntro');
+  if(!overlay || !video){ return; }
+  return new Promise(resolve=>{
+    const finish = ()=>{
+      video.pause();
+      overlay.classList.add('hidden');
+      video.removeEventListener('ended', finish);
+      skipBtn.removeEventListener('click', finish);
+      resolve();
+    };
+    skipBtn.addEventListener('click', finish);
+    video.addEventListener('ended', finish);
+    // Position overlay to cover the canvas area (centred on screen)
+    const canvasRect = document.getElementById('gameCanvas').getBoundingClientRect();
+    overlay.style.position = 'fixed';
+    overlay.style.left = `${canvasRect.left}px`;
+    overlay.style.top = `${canvasRect.top}px`;
+    overlay.style.width = `${canvasRect.width}px`;
+    overlay.style.height = `${canvasRect.height}px`;
+    overlay.classList.remove('hidden');
+    video.style.width = '100%';
+    video.style.height = '100%';
+    video.currentTime = 0;
+    video.play().catch(()=>finish()); // auto-resolve if play blocked
+  });
+}
+
 async function launchBloom(){
   if (currentStop){ try{currentStop();}catch(e){} currentStop=null; }
   const row=document.getElementById('rowBloom');
@@ -66,8 +97,9 @@ async function launchDream(){
   clearSelection();
   row.classList.add('selected');
 
-  const mod = await import('./games/dream_full.js');
+  const modPromise = import('./games/dream_full.js');
 
+  // Show game UI (canvas visible) but delay game start until after intro
   mainMenu.style.display='none';
   showGame(true);
   document.getElementById('gameOver').classList.add('hidden');
@@ -84,6 +116,11 @@ async function launchDream(){
 
   // In launchDream within function launchDream before mod.start maybe restore JUMP
   document.getElementById('jumpBtn').innerText = 'JUMP!';
+
+  // Play intro overlay inside canvas before starting game
+  await playDreamIntro();
+
+  const mod = await modPromise;
 
   if(typeof mod.start==='function') mod.start();
   currentStop = typeof mod.stop==='function'? mod.stop : null;

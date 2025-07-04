@@ -178,7 +178,45 @@ body {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
+}
+
+/* ----- Intro video overlay for Dream Chaser ----- */
+.intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.intro-video {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.skip-intro-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    padding: 10px 20px;
+    border: 3px solid #fff;
+    background: #4169e1;
+    color: #fff;
+    text-shadow: 1px 1px 0 #191970;
+    cursor: pointer;
+}
+
+.skip-intro-btn:active {
+    transform: scale(0.95);
 }
 
 /* Mobile optimizations */
