@@ -74,7 +74,7 @@ let jumpPressed = false; // Track if jump was pressed this frame
 const playerRightImg = new Image();
 playerRightImg.src = 'sprites/(dream-chaser) player-right.png';
 const playerLeftImg = new Image();
-playerLeftImg.src = 'sprites/(dream chaser) player-left.png';
+playerLeftImg.src = 'sprites/(dream-chaser) player-left.png';
 
 // Load cloud platform sprite
 const cloudImg = new Image();
@@ -322,10 +322,13 @@ function generateNewPlatform() {
 function drawPlayer() {
     ctx.save();
     let img = player.facingRight ? playerRightImg : playerLeftImg;
-    // Make the sprite larger (48x48)
-    const spriteWidth = 48;
+    // Slightly narrower sprite to correct aspect (approx -15% width)
+    const spriteWidth = 40;
     const spriteHeight = 48;
-    ctx.drawImage(img, player.x + player.width / 2 - spriteWidth / 2, player.y + player.height - spriteHeight, spriteWidth, spriteHeight);
+    // Guard against image not yet loaded (drawImage throws if width/height 0)
+    if (img.complete && img.naturalWidth > 0) {
+        ctx.drawImage(img, player.x + player.width / 2 - spriteWidth / 2, player.y + player.height - spriteHeight, spriteWidth, spriteHeight);
+    }
     ctx.restore();
 }
 
@@ -752,11 +755,13 @@ jumpBtn.addEventListener('mouseup', () => keys.jump = false);
 document.addEventListener('keydown', (e) => {
     switch(e.key) {
         case 'ArrowLeft':
+            e.preventDefault();
         case 'a':
         case 'A':
             keys.left = true;
             break;
         case 'ArrowRight':
+            e.preventDefault();
         case 'd':
         case 'D':
             keys.right = true;
@@ -774,11 +779,13 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => {
     switch(e.key) {
         case 'ArrowLeft':
+            e.preventDefault();
         case 'a':
         case 'A':
             keys.left = false;
             break;
         case 'ArrowRight':
+            e.preventDefault();
         case 'd':
         case 'D':
             keys.right = false;

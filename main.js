@@ -97,7 +97,7 @@ async function launchDream(){
   clearSelection();
   row.classList.add('selected');
 
-  const modPromise = import('./games/dream_full.js');
+  const modPromise = import('./games/dream_full.js?v=2');
 
   // Show game UI (canvas visible) but delay game start until after intro
   mainMenu.style.display='none';

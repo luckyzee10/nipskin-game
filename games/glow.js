@@ -4,12 +4,13 @@ let canvas, ctx;
 let rafId;
 
 // Assets
-const imgPlayer = new Image(); imgPlayer.src = 'sprites/glow-getter-character.png';
+const imgPlayerR = new Image(); imgPlayerR.src = 'sprites/glow-getter-right.png';
+const imgPlayerL = new Image(); imgPlayerL.src = 'sprites/glow-getter-left.png';
 const imgEnemy  = new Image(); imgEnemy.src = 'sprites/pimple-punk.png';
 const imgDiamond= new Image(); imgDiamond.src = 'sprites/diamond.png';
 
 // Sizes
-const PLAYER_W = 32, PLAYER_H = 32;
+const PLAYER_W = 28, PLAYER_H = 32;
 const ENEMY_BASE_W = 28, ENEMY_BASE_H = 28;
 const DIAMOND_W = 20, DIAMOND_H = 20;
 const BULLET_W = 4, BULLET_H = 10;
@@ -23,7 +24,7 @@ const MAX_LIFE = 100;
 let life = MAX_LIFE;
 
 // Game objects
-const player = {x:0,y:0,vx:0,speed:4};
+const player = {x:0,y:0,vx:0,speed:4,facingRight:true};
 const bullets = [];
 const enemies = [];
 const diamonds= [];
@@ -104,6 +105,7 @@ function stop(){
 function reset(){
   player.x = canvas.width/2-PLAYER_W/2;
   player.y = canvas.height-PLAYER_H-10;
+  player.facingRight = true;
   bullets.length=0; enemies.length=0; diamonds.length=0;
   score=0; gameOver=false;
   life = MAX_LIFE;
@@ -135,8 +137,8 @@ function update(){
   });
   // Player movement
   player.vx=0;
-  if(keys.left) player.vx=-player.speed;
-  if(keys.right) player.vx=player.speed;
+  if(keys.left){ player.vx=-player.speed; player.facingRight=false; }
+  if(keys.right){ player.vx=player.speed; player.facingRight=true; }
   player.x+=player.vx;
   player.x=Math.max(0,Math.min(canvas.width-PLAYER_W,player.x));
 
@@ -215,7 +217,8 @@ function render(){
   diamonds.forEach(d=> ctx.drawImage(imgDiamond,d.x,d.y,DIAMOND_W,DIAMOND_H));
   enemies.forEach(e=> ctx.drawImage(imgEnemy,e.x,e.y,e.w,e.h));
   bullets.forEach(b=> {ctx.fillStyle='#0ff'; ctx.fillRect(b.x,b.y,BULLET_W,BULLET_H);} );
-  ctx.drawImage(imgPlayer,player.x,player.y,PLAYER_W,PLAYER_H);
+  const spr = player.facingRight? imgPlayerR : imgPlayerL;
+  ctx.drawImage(spr,player.x,player.y,PLAYER_W,PLAYER_H);
 
   // draw life bar
   const barWidth = 100;

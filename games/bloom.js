@@ -170,40 +170,46 @@ function start(){
     }
   }
 
-  // Virtual joystick on canvas
-  const rect = canvas.getBoundingClientRect();
-  const thresh = 20; // deadzone
+  // ---------- On-screen joystick ----------
+  const joy=document.getElementById('bloomJoystick');
+  if(joy) joy.classList.remove('hidden');
+  const thumb=joy? joy.querySelector('.stick-thumb'):null;
+  const baseRect = joy? joy.getBoundingClientRect():{width:0,height:0,left:0,top:0};
+  const thresh = 20;
+
+  function moveThumb(dx,dy){ if(!thumb) return; thumb.style.transform=`translate(${dx}px,${dy}px)`; }
 
   function processPointer(e){
     if(!pointerActive) return;
-    let x=e.clientX - rect.left;
-    let y=e.clientY - rect.top;
-    let cx=rect.width/2;
-    let cy=rect.height/2;
+    let x=e.clientX - baseRect.left;
+    let y=e.clientY - baseRect.top;
+    let cx=baseRect.width/2;
+    let cy=baseRect.height/2;
     let dx=x-cx;
     let dy=y-cy;
     keys.left = dx < -thresh;
     keys.right= dx >  thresh;
     keys.up   = dy < -thresh;
     keys.down = dy >  thresh;
+    // limit thumb movement radius 40px
+    const max=40;
+    const dist=Math.hypot(dx,dy);
+    if(dist>max){ dx=dx/dist*max; dy=dy/dist*max; }
+    moveThumb(dx,dy);
   }
 
-  function onJoyStart(e){
-    pointerActive=true;
-    pointerId=e.pointerId;
-    processPointer(e);
-  }
-  function onJoyMove(e){ if(e.pointerId===pointerId) processPointer(e); }
-  function onJoyEnd(e){ if(e.pointerId===pointerId){ pointerActive=false; clearKeys(); } }
+  function onJoyStart(e){ pointerActive=true; pointerId=e.pointerId; processPointer(e);} 
+  function onJoyMove(e){ if(e.pointerId===pointerId) processPointer(e);} 
+  function onJoyEnd(e){ if(e.pointerId===pointerId){ pointerActive=false; clearKeys(); moveThumb(0,0);} }
 
-  canvas.addEventListener('pointerdown',onJoyStart);
-  canvas.addEventListener('pointermove',onJoyMove);
-  canvas.addEventListener('pointerup',onJoyEnd);
-  canvas.addEventListener('pointercancel',onJoyEnd);
+  joy.addEventListener('pointerdown',onJoyStart);
+  joy.addEventListener('pointermove',onJoyMove);
+  joy.addEventListener('pointerup',onJoyEnd);
+  joy.addEventListener('pointercancel',onJoyEnd);
 
   start._listeners=[
-    [canvas,'pointerdown',onJoyStart],[canvas,'pointermove',onJoyMove],
-    [canvas,'pointerup',onJoyEnd],[canvas,'pointercancel',onJoyEnd]
+    [joy,'pointerdown',onJoyStart],[joy,'pointermove',onJoyMove],
+    [joy,'pointerup',onJoyEnd],[joy,'pointercancel',onJoyEnd]
   ];
 
   loop();
@@ -216,6 +222,7 @@ function stop(){
   // remove touch listeners
   if(start._listeners){ start._listeners.forEach(([el,ev,fn])=>el.removeEventListener(ev,fn)); }
   clearKeys();
+  const joy=document.getElementById('bloomJoystick'); if(joy) joy.classList.add('hidden');
 }
 
 function loop(){
