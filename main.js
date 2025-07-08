@@ -209,7 +209,7 @@ async function launchBloom(){
     
     // Set Bloom Boss background immediately
     disableGameBG();
-    setCanvasBG('assets/back%20grounds/Bloom%20boss%20BG.jpg?t=' + Date.now());
+    setCanvasBG('assets/Back%20grounds/Bloom%20boss%20BG.jpg?t=' + Date.now());
     restartBtn.onclick = ()=>{ if(currentStop){currentStop();} launchBloom(); };
   }
 }
@@ -258,7 +258,7 @@ async function launchDream(){
 
   // Set Dream Chaser background immediately
   disableGameBG();
-  setCanvasBG('assets/back%20grounds/Dream%20Chaser%20BG.jpg?t=' + Date.now());
+  setCanvasBG('assets/Back%20grounds/Dream%20Chaser%20BG.jpg?t=' + Date.now());
   restartBtn.onclick = ()=>{ if(currentStop){currentStop();} launchDream(); };
 }
 
@@ -308,7 +308,7 @@ async function launchGlow(){
 
   // Set Glow Getter background immediately
   disableGameBG();
-  setCanvasBG('assets/back%20grounds/glowgetter%20BG.jpg?t=' + Date.now());
+  setCanvasBG('assets/Back%20grounds/glowgetter%20BG.jpg?t=' + Date.now());
   restartBtn.onclick = ()=>{ if(currentStop){currentStop();} launchGlow(); };
 }
 
