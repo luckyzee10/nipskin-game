@@ -32,7 +32,11 @@
 
         <div class="game-header">
             <button id="backToMenuBtn" class="back-btn" style="display:none;" aria-label="Back to Menu">←</button>
-            <h1 class="game-title">⭐ DREAM CHASER! ⭐</h1>
+            <div class="game-title-container">
+                <img id="dreamTitle" class="game-title-img" src="assets/titles/dream chaser title.png" alt="Dream Chaser" style="display: block;">
+                <img id="bloomTitle" class="game-title-img" src="assets/titles/bloom boss title.png" alt="Bloom Boss" style="display: none;">
+                <img id="glowTitle" class="game-title-img" src="assets/titles/glow getter title.png" alt="Glow Getter" style="display: none;">
+            </div>
             <div class="score">Score: <span id="score">0</span></div>
         </div>
         
@@ -52,12 +56,26 @@
                 <button id="restartBtn" class="restart-btn">PLAY AGAIN</button>
                 <button id="menuBtn" class="restart-btn">MAIN MENU</button>
             </div>
+
+            <!-- Special winner overlay for Dream Chaser -->
+            <div id="winnerOverlay" class="winner-overlay hidden">
+                <h2>Felicitaciones!</h2>
+                <p>Eres el ganador número: <span id="winnerNumber">1</span></p>
+                <p class="discount-msg">Has ganado un 25% de descuento en tu próxima compra de NipSkin!<br>¡Tómale un pantallazo a esta imagen y envíanosla por WhatsApp para reclamar tu descuento!</p>
+                <button id="winnerRestartBtn" class="restart-btn">JUGAR DE NUEVO</button>
+                <button id="winnerMenuBtn" class="restart-btn">MENÚ PRINCIPAL</button>
+            </div>
         </div>
 
         <!-- Dream Chaser intro video overlay -->
         <div id="introOverlay" class="intro-overlay hidden">
-            <video id="introVideo" class="intro-video" src="assets/initial_video.mp4" playsinline></video>
+            <video id="introVideo" class="intro-video" src="assets/videos/dream_chaser_adjusted_video.mp4" playsinline></video>
             <button id="skipIntro" class="skip-intro-btn">SKIP</button>
+        </div>
+
+        <!-- Dream/Bloom/Glow start screen overlay (image) -->
+        <div id="startOverlay" class="start-overlay hidden">
+            <img id="startImg" class="start-img" src="" alt="Start screen" />
         </div>
 
         <!-- On-screen joystick for Bloom Boss (mobile) -->

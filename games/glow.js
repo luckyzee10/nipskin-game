@@ -6,14 +6,23 @@ let rafId;
 // Assets
 const imgPlayerR = new Image(); imgPlayerR.src = 'sprites/glow-getter-right.png';
 const imgPlayerL = new Image(); imgPlayerL.src = 'sprites/glow-getter-left.png';
-const imgEnemy  = new Image(); imgEnemy.src = 'sprites/pimple-punk.png';
-const imgDiamond= new Image(); imgDiamond.src = 'sprites/diamond.png';
+const imgEnemy  = new Image(); imgEnemy.src = 'sprites/meteor.png';
+const imgDiamond= new Image(); imgDiamond.src = 'sprites/star.png';
 
 // Sizes
-const PLAYER_W = 28, PLAYER_H = 32;
+// Final desired player size (~40% larger than original)
+const PLAYER_SCALE = 1.4;
+const PLAYER_W = Math.round(28 * PLAYER_SCALE), PLAYER_H = Math.round(32 * PLAYER_SCALE);
 const ENEMY_BASE_W = 28, ENEMY_BASE_H = 28;
 const DIAMOND_W = 20, DIAMOND_H = 20;
 const BULLET_W = 4, BULLET_H = 10;
+
+// -------- Difficulty tuning --------
+// Lower values to make game easier
+const ENEMY_SPEED = 0.7;           // vertical speed of meteors (px per frame)
+const DIAMOND_SPEED = 0.9;         // vertical speed of stars (px per frame)
+const ENEMY_SPAWN_INTERVAL = 90;   // frames between meteor spawns (was 60)
+const DIAMOND_SPAWN_INTERVAL = 200;// frames between star spawns (was 150)
 
 // Star field
 const STAR_COUNT = 120;
@@ -55,11 +64,11 @@ function spawnEnemy(){
   const w = ENEMY_BASE_W*scale;
   const h = ENEMY_BASE_H*scale;
   const x = Math.random()*(canvas.width-w);
-  enemies.push({x,y: -h,vy:1,w,h});
+  enemies.push({x,y: -h,vy:ENEMY_SPEED,w,h});
 }
 function spawnDiamond(){
   const x = Math.random()*(canvas.width-DIAMOND_W);
-  diamonds.push({x,y:-DIAMOND_H,vy:1.2});
+  diamonds.push({x,y:-DIAMOND_H,vy:DIAMOND_SPEED});
 }
 
 // Start/stop
@@ -159,8 +168,8 @@ function update(){
 
   // spawn enemies/diamonds periodically
   frame++;
-  if(frame%60===0) spawnEnemy();
-  if(frame%150===0) spawnDiamond();
+  if(frame%ENEMY_SPAWN_INTERVAL===0) spawnEnemy();
+  if(frame%DIAMOND_SPAWN_INTERVAL===0) spawnDiamond();
 
   // Update enemies
   enemies.forEach(e=>{ e.y+=e.vy; });
@@ -204,8 +213,8 @@ function update(){
 
 function render(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  // background (space black)
-  ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Background disabled - using CSS background instead
+  // ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
 
   // draw stars
   stars.forEach(s=>{
@@ -221,33 +230,71 @@ function render(){
   ctx.drawImage(spr,player.x,player.y,PLAYER_W,PLAYER_H);
 
   // draw life bar
-  const barWidth = 100;
-  const barHeight = 8;
-  const barX = canvas.width - barWidth - 10;
-  const barY = 10;
-  ctx.fillStyle = '#444';
-  ctx.fillRect(barX, barY, barWidth, barHeight);
-  ctx.fillStyle = life > MAX_LIFE*0.4 ? '#0f0' : '#f00';
-  ctx.fillRect(barX, barY, barWidth * (life / MAX_LIFE), barHeight);
-  ctx.strokeStyle = '#fff';
-  ctx.strokeRect(barX, barY, barWidth, barHeight);
+  drawLifeBar();
+}
 
-  // score text is in header
+// --------- Pixel art life bar ----------
+function drawLifeBar(){
+  const fullW = 120;
+  const fullH = 28; // slightly taller for chunkier bar
+  const x = canvas.width - fullW - 10;
+  const y = 8;
+
+  const outer = '#dca7ff';
+  const inner = '#ffffff';
+  const fill  = '#c66bff';
+  const t = 8; // thicker outline -> larger rounded corners
+
+  ctx.save();
+  ctx.lineWidth = t;
+  ctx.lineJoin = 'round';
+  ctx.lineCap  = 'round';
+
+  // Outer rounded rectangle frame
+  ctx.strokeStyle = outer;
+  ctx.strokeRect(x + t/2, y + t/2, fullW - t, fullH - t);
+
+  // Inner background (white)
+  const innerX = x + t;
+  const innerY = y + t;
+  const innerW = fullW - 2*t;
+  const innerH = fullH - 2*t;
+  ctx.fillStyle = inner;
+  ctx.fillRect(innerX, innerY, innerW, innerH);
+
+  // Fill amount
+  const pct = Math.max(0, life)/MAX_LIFE;
+  const fillW = Math.floor(innerW * pct);
+  if(fillW>0){
+    ctx.fillStyle = fill;
+    ctx.fillRect(innerX, innerY, fillW, innerH);
+  }
+  ctx.restore();
 }
 
 function triggerLose(){
   gameOver=true;
-  const final=document.getElementById('finalScore'); if(final) final.textContent=score;
-  const gov=document.getElementById('gameOver'); if(gov) gov.classList.remove('hidden');
-  const restart=document.getElementById('restartBtn');
-  const menu=document.getElementById('menuBtn');
-  if(restart){
-    restart.onclick = ()=>{
-      gov.classList.add('hidden');
-      reset();
-    };
+  if(score >= 45){
+    const overlay = document.getElementById('winnerOverlay');
+    const numSpan = document.getElementById('winnerNumber');
+    if(numSpan){ window.getGlobalWinnerNumber().then(n=>{ numSpan.textContent = n; }); }
+
+    overlay.classList.remove('hidden');
+    document.body.classList.add('winner-mode');
+    document.querySelector('.game-ui').style.display = 'block';
+
+    const wr = document.getElementById('winnerRestartBtn');
+    const wm = document.getElementById('winnerMenuBtn');
+    if(wr){ wr.onclick = ()=>{ overlay.classList.add('hidden'); document.body.classList.remove('winner-mode'); reset(); }; }
+    if(wm){ wm.onclick = ()=>{ document.body.classList.remove('winner-mode'); window.returnToMenu && window.returnToMenu(); }; }
+  } else {
+    const final=document.getElementById('finalScore'); if(final) final.textContent=score;
+    const gov=document.getElementById('gameOver'); if(gov) gov.classList.remove('hidden');
+    const restart=document.getElementById('restartBtn');
+    const menu=document.getElementById('menuBtn');
+    if(restart){ restart.onclick = ()=>{ gov.classList.add('hidden'); reset(); }; }
+    if(menu){ menu.onclick = ()=>{ window.returnToMenu && window.returnToMenu(); }; }
   }
-  if(menu){ menu.onclick = ()=>{ window.returnToMenu && window.returnToMenu(); }; }
 }
 
 export {start, stop}; 

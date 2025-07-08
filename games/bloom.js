@@ -6,8 +6,10 @@ let rafId;
 
 // ---- Scaling constants ----
 const SCALE = 1.1; // 10% larger
-const PLAYER_W = Math.round(30 * SCALE);
-const PLAYER_H = Math.round(32 * SCALE);
+// Further enlarge player by 10% relative to other entities
+const PLAYER_SCALE = SCALE * 1.1; // overall ~21% larger than original asset
+const PLAYER_W = Math.round(30 * PLAYER_SCALE);
+const PLAYER_H = Math.round(32 * PLAYER_SCALE);
 const ENTITY_SIZE = Math.round(32 * SCALE); // base size for cacti
 const FLOWER_SIZE = Math.round(ENTITY_SIZE * 1.05); // flowers are 5% larger
 
@@ -19,7 +21,7 @@ const player = {
   h: PLAYER_H,
   vx:0,
   vy:0,
-  speed:3,
+  speed:2, // slower movement
   facingRight:true
 };
 const flowers = [];
@@ -29,8 +31,8 @@ let score = 0;
 // assets
 const imgPlayerR = new Image(); imgPlayerR.src='sprites/bloom boss right.png';
 const imgPlayerL = new Image(); imgPlayerL.src='sprites/bloom boss left.png';
-const imgFlower  = new Image(); imgFlower.src='sprites/flower.png';
-const imgCactus  = new Image(); imgCactus.src='sprites/cactus.png';
+const imgFlower  = new Image(); imgFlower.src='sprites/new flower sprite.png';
+const imgCactus  = new Image(); imgCactus.src='sprites/new cactus sprite.png';
 const imgBasket  = new Image(); imgBasket.src='sprites/basket.png';
 
 // background pattern (loaded from asset)
@@ -99,7 +101,16 @@ function spawnBorderCactus(){
     default:
       x = canvas.width-half; y = Math.random()*(canvas.height-ENTITY_SIZE)+half; break;
   }
-  cacti.push({x, y, active:true, speed:0.8+Math.random()*0.4});
+  // After 30 points introduce very slow "obstacle" cacti
+  let spd, act;
+  if(score >= 30){
+    spd = 0.15 + Math.random()*0.15; // super slow
+    act = true; // already active but barely moves
+  } else {
+    spd = 0.8+Math.random()*0.4;
+    act = true;
+  }
+  cacti.push({x, y, active: act, speed: spd});
   cactiActivated++;
 }
 
@@ -212,7 +223,7 @@ function start(){
     [joy,'pointerup',onJoyEnd],[joy,'pointercancel',onJoyEnd]
   ];
 
-  loop();
+  startMainLoop();
 }
 
 function stop(){
@@ -229,6 +240,12 @@ function loop(){
   update();
   render();
   rafId=requestAnimationFrame(loop);
+}
+
+// Helper to (re)start main loop safely
+function startMainLoop(){
+  if(rafId){ cancelAnimationFrame(rafId); rafId=null; }
+  rafId = requestAnimationFrame(loop);
 }
 
 function update(){
@@ -256,8 +273,8 @@ function update(){
   updateCactiActivation();
   moveActiveCacti();
 
-  // collect flowers
-  const collectDist = FLOWER_SIZE * 0.75; // relaxed threshold
+  // collect flowers - bigger hitbox
+  const collectDist = FLOWER_SIZE * 0.95;
   for(let i=flowers.length-1;i>=0;i--){
     const f=flowers[i];
     if(Math.abs(player.x-f.x)<collectDist && Math.abs(player.y-f.y)<collectDist){
@@ -265,8 +282,8 @@ function update(){
     }
   }
 
-  // collision with cactus -> lose
-  const cactusHit = ENTITY_SIZE * 0.75;
+  // collision with cactus -> smaller hitbox
+  const cactusHit = ENTITY_SIZE * 0.6;
   for(const c of cacti){
     if(Math.abs(player.x-c.x)<cactusHit && Math.abs(player.y-c.y)<cactusHit){
       triggerLose();
@@ -286,9 +303,9 @@ function update(){
 
 function render(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  // top-down field view with image pattern fallback
-  ctx.fillStyle = fieldPattern || '#5abf41';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Background disabled - using CSS background instead
+  // ctx.fillStyle = fieldPattern || '#5abf41';
+  // ctx.fillRect(0,0,canvas.width,canvas.height);
   // draw flowers
   const halfF=FLOWER_SIZE/2;
   flowers.forEach(f=>ctx.drawImage(imgFlower,f.x-halfF,f.y-halfF,FLOWER_SIZE,FLOWER_SIZE));
@@ -312,22 +329,32 @@ function triggerLose(){
 }
 
 function endGame(){
-  // show global game over UI
-  const final=document.getElementById('finalScore');
-  if(final) final.textContent=score;
-  const gov=document.getElementById('gameOver');
-  if(gov) gov.classList.remove('hidden');
-  // wire buttons
-  const restart=document.getElementById('restartBtn');
-  const menu=document.getElementById('menuBtn');
-  if(restart){
-    restart.onclick = () => {
-      gov.classList.add('hidden');
-      reset();
-      rafId=requestAnimationFrame(loop);
-    };
+  // show global game over UI or winner overlay
+  if(score >= 55){
+    const overlay = document.getElementById('winnerOverlay');
+    const numSpan = document.getElementById('winnerNumber');
+    if(numSpan){ window.getGlobalWinnerNumber().then(n=>{ numSpan.textContent = n; }); }
+
+    overlay.classList.remove('hidden');
+    document.querySelector('.game-ui').style.display = 'block';
+    document.body.classList.add('winner-mode');
+
+    const wr = document.getElementById('winnerRestartBtn');
+    const wm = document.getElementById('winnerMenuBtn');
+    if(wr){
+      wr.onclick = ()=>{ overlay.classList.add('hidden'); document.body.classList.remove('winner-mode'); reset(); startMainLoop();};
+    }
+    if(wm){ wm.onclick = ()=>{ document.body.classList.remove('winner-mode'); window.returnToMenu && window.returnToMenu(); }; }
+  } else {
+    const final=document.getElementById('finalScore');
+    if(final) final.textContent=score;
+    const gov=document.getElementById('gameOver');
+    if(gov) gov.classList.remove('hidden');
+    const restart=document.getElementById('restartBtn');
+    const menu=document.getElementById('menuBtn');
+    if(restart){ restart.onclick = ()=>{ gov.classList.add('hidden'); reset(); startMainLoop(); }; }
+    if(menu){ menu.onclick = ()=>{ window.returnToMenu && window.returnToMenu(); }; }
   }
-  if(menu){ menu.onclick = () => { window.returnToMenu && window.returnToMenu(); }; }
   // pause loop but keep context; listeners remain so restart works
   cancelAnimationFrame(rafId);
 }

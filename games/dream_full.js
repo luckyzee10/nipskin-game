@@ -16,6 +16,8 @@ const jumpBtn = document.getElementById('jumpBtn');
 let gameState = 'menu'; // 'menu', 'playing', 'gameOver'
 let score = 0;
 let gameSpeed = 1;
+let progress = 0; // counts frames survived for speed/thunder logic
+const SPEED_RAMP_FRAMES = 1500; // cap after 25s @60fps (~1500 frames)
 
 // Performance optimizations
 let backgroundGradient = null;
@@ -279,7 +281,8 @@ function initializePlatforms() {
         x: canvas.width / 2 - platformWidth / 2,
         y: canvas.height - 50,
         width: platformWidth,
-        height: platformHeight
+        height: platformHeight,
+        scored: true // Starting platform doesn't give points
     });
     
     // Generate initial platforms
@@ -288,7 +291,8 @@ function initializePlatforms() {
             x: Math.random() * (canvas.width - platformWidth),
             y: canvas.height - 50 - (i * 90),
             width: platformWidth,
-            height: platformHeight
+            height: platformHeight,
+            scored: false
         });
     }
 }
@@ -300,8 +304,8 @@ function generateNewPlatform() {
     
     // Determine if this should be a thunder cloud (1 in 10 chance after 1000 points)
     let isThunderCloud = false;
-    if (score >= 1000) {
-        thunderCloudChance = Math.random() < 0.1; // 10% chance
+    if (progress >= 1000) {
+        thunderCloudChance = Math.random() < 0.1; // 10% chance after about 1000 frames
         isThunderCloud = thunderCloudChance;
     }
     
@@ -314,7 +318,8 @@ function generateNewPlatform() {
         isFalling: false,
         fallSpeed: 0,
         isActivated: false,
-        fallDelay: 0
+        fallDelay: 0,
+        scored: false
     });
 }
 
@@ -499,6 +504,13 @@ function checkCollisions() {
                 player.velocityY = 0;
                 player.onGround = true;
                 
+                // Score points for landing on a new cloud (but not the starting platform)
+                if (!platform.scored && platform !== platforms[0]) {
+                    platform.scored = true;
+                    score += 1;
+                    scoreElement.textContent = score;
+                }
+                
                 // If it's a thunder cloud, make it start falling
                 if (platform.isThunderCloud && !platform.isActivated) {
                     platform.isActivated = true;
@@ -512,6 +524,8 @@ function checkCollisions() {
 // Update game logic
 function update() {
     if (gameState !== 'playing') return;
+    // increment progress every frame for difficulty scaling
+    progress++;
     
     // Handle input and update facing direction
     if (keys.left) {
@@ -586,7 +600,8 @@ function update() {
     checkCollisions();
     
     // Move platforms down
-    gameSpeed = 1 + score * 0.001;
+    const effective = Math.min(progress, SPEED_RAMP_FRAMES);
+    gameSpeed = 1 + effective * 0.001;
     platforms.forEach(platform => {
         // handle thunder cloud activation delay
         if (platform.isThunderCloud && platform.isActivated && !platform.isFalling) {
@@ -615,8 +630,8 @@ function update() {
     }
     
     // Update score
-    score += 1;
-    scoreElement.textContent = score;
+    // score += 1; // Removed automatic score increment
+    // scoreElement.textContent = score; // Removed automatic score increment
     
     // Check game over
     if (player.y > canvas.height) {
@@ -626,9 +641,13 @@ function update() {
 
 // Render game
 function render() {
+    if (gameState !== 'playing' && gameState !== 'gameOver') return;
+    
+    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    drawBackground();
+    // Background disabled - using CSS background instead
+    // drawBackground();
     drawPlatforms();
     drawPlayer();
 }
@@ -646,6 +665,8 @@ function gameLoop() {
 function startGame() {
     gameState = 'playing';
     score = 0;
+    progress = 0;
+    scoreElement.textContent = score; // Ensure score display is updated
     gameSpeed = 1;
     player.x = canvas.width / 2 - 15;
     player.y = canvas.height / 2 - 25;
@@ -663,25 +684,49 @@ function startGame() {
 // Game over
 function gameOver() {
     gameState = 'gameOver';
-    finalScoreElement.textContent = score;
-    gameOverDiv.classList.remove('hidden');
-    // Hide start button so only PLAY AGAIN shows
-    startBtn.classList.add('hidden');
-    document.querySelector('.game-ui').style.display = 'block';
+    if(score >= 45){
+        // Special winner screen
+        const overlay = document.getElementById('winnerOverlay');
+        const numberSpan = document.getElementById('winnerNumber');
+        if(numberSpan){
+          window.getGlobalWinnerNumber().then(n=>{ numberSpan.textContent = n; });
+        }
 
-    // Re-attach PLAY AGAIN and MAIN MENU behaviour without duplicate listeners
-    const restart = document.getElementById('restartBtn');
-    const menu = document.getElementById('menuBtn');
-    if (restart) {
-        restart.onclick = () => {
-            gameOverDiv.classList.add('hidden');
-            startGame();
-        };
-    }
-    if (menu) {
-        menu.onclick = () => {
-            window.returnToMenu && window.returnToMenu();
-        };
+        overlay.classList.remove('hidden');
+        document.body.classList.add('winner-mode');
+        document.querySelector('.game-ui').style.display = 'block';
+
+        const wr = document.getElementById('winnerRestartBtn');
+        const wm = document.getElementById('winnerMenuBtn');
+        if(wr){
+            wr.onclick = ()=>{
+                overlay.classList.add('hidden');
+                document.body.classList.remove('winner-mode');
+                startGame();
+            };
+        }
+        if(wm){ wm.onclick = ()=>{ document.body.classList.remove('winner-mode'); window.returnToMenu && window.returnToMenu(); }; }
+    } else {
+        finalScoreElement.textContent = score;
+        gameOverDiv.classList.remove('hidden');
+        // Hide start button so only PLAY AGAIN shows
+        startBtn.classList.add('hidden');
+        document.querySelector('.game-ui').style.display = 'block';
+
+        // Re-attach PLAY AGAIN and MAIN MENU behaviour without duplicate listeners
+        const restart = document.getElementById('restartBtn');
+        const menu = document.getElementById('menuBtn');
+        if (restart) {
+            restart.onclick = () => {
+                gameOverDiv.classList.add('hidden');
+                startGame();
+            };
+        }
+        if (menu) {
+            menu.onclick = () => {
+                window.returnToMenu && window.returnToMenu();
+            };
+        }
     }
 }
 
