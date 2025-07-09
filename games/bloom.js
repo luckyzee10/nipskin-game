@@ -184,28 +184,56 @@ function start(){
   // ---------- On-screen joystick ----------
   const joy=document.getElementById('bloomJoystick');
   if(joy) joy.classList.remove('hidden');
-  const thumb=joy? joy.querySelector('.stick-thumb'):null;
-  const baseRect = joy? joy.getBoundingClientRect():{width:0,height:0,left:0,top:0};
-  const thresh = 20;
+  // --- Position joystick just below the game canvas ---
+  function positionJoystick(){
+    if(!joy) return;
+    const rect = canvas.getBoundingClientRect();
+    joy.style.position = 'fixed';
+    joy.style.top  = `${rect.bottom + 10}px`; // 10px gap below canvas
+    joy.style.left = `${rect.left + rect.width/2}px`;
+    joy.style.bottom = 'auto';
+  }
+  positionJoystick();
+  window.addEventListener('resize', positionJoystick);
+  window.addEventListener('scroll', positionJoystick, {passive:true});
+
+  // show mobile tooltip briefly
+  const tip = document.getElementById('joystickTip');
+  if(tip){
+    tip.classList.remove('hidden');
+    setTimeout(()=>tip.classList.add('hidden'), 4000);
+  }
+  // store listener for cleanup
+  start._listeners = start._listeners || [];
+  start._listeners.push(
+    [joy,'pointerdown',onJoyStart],[joy,'pointermove',onJoyMove],
+    [joy,'pointerup',onJoyEnd],[joy,'pointercancel',onJoyEnd]
+  );
+  start._listeners.push([window,'resize',positionJoystick]);
+  start._listeners.push([window,'scroll',positionJoystick]);
+
+  // ------ Joystick movement handling (restored) ------
+  const thumb = joy ? joy.querySelector('.stick-thumb') : null;
+  let thresh = 20;
 
   function moveThumb(dx,dy){ if(!thumb) return; thumb.style.transform=`translate(${dx}px,${dy}px)`; }
 
   function processPointer(e){
     if(!pointerActive) return;
-    let x=e.clientX - baseRect.left;
-    let y=e.clientY - baseRect.top;
-    let cx=baseRect.width/2;
-    let cy=baseRect.height/2;
-    let dx=x-cx;
-    let dy=y-cy;
+    const rect = joy.getBoundingClientRect();
+    const cx = rect.width/2;
+    const cy = rect.height/2;
+    let dx = (e.clientX - rect.left) - cx;
+    let dy = (e.clientY - rect.top ) - cy;
+
     keys.left = dx < -thresh;
     keys.right= dx >  thresh;
     keys.up   = dy < -thresh;
     keys.down = dy >  thresh;
-    // limit thumb movement radius 40px
-    const max=40;
-    const dist=Math.hypot(dx,dy);
-    if(dist>max){ dx=dx/dist*max; dy=dy/dist*max; }
+
+    const max = 40;
+    const dist = Math.hypot(dx,dy);
+    if(dist > max){ dx = dx/dist*max; dy = dy/dist*max; }
     moveThumb(dx,dy);
   }
 
@@ -218,10 +246,10 @@ function start(){
   joy.addEventListener('pointerup',onJoyEnd);
   joy.addEventListener('pointercancel',onJoyEnd);
 
-  start._listeners=[
+  start._listeners.push(
     [joy,'pointerdown',onJoyStart],[joy,'pointermove',onJoyMove],
     [joy,'pointerup',onJoyEnd],[joy,'pointercancel',onJoyEnd]
-  ];
+  );
 
   startMainLoop();
 }

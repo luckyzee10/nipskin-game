@@ -264,7 +264,7 @@ body {
     transform: translateX(-50%);
     width: 120px;
     height: 120px;
-    opacity: 0.75; /* more visible */
+    opacity: 0.85; /* 85% opacity */
     touch-action: none;
     z-index: 150;
 }
@@ -273,7 +273,7 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: rgba(255,182,193,0.25); /* light pink */
+    background: #ffb6c1; /* solid light pink */
     position: relative;
 }
 
@@ -286,7 +286,77 @@ body {
     margin-left: -25px;
     margin-top: -25px;
     border-radius: 50%;
-    background: rgba(255,182,193,0.5); /* pink thumb */
+    background: #ff9ac2; /* solid pink thumb */
+}
+
+/* Joystick directional arrows (minimalist triangles) */
+.direction-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none; /* let touches pass through */
+}
+
+/* Up arrow */
+.arrow-up {
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 14px solid #ff9ac2;
+}
+
+/* Down arrow */
+.arrow-down {
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 14px solid #ff9ac2;
+}
+
+/* Left arrow */
+.arrow-left {
+  left: -18px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-right: 14px solid #ff9ac2;
+}
+
+/* Right arrow */
+.arrow-right {
+  right: -18px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-left: 14px solid #ff9ac2;
+}
+
+/* Slightly smaller on very small screens */
+@media (max-width: 480px) {
+  .arrow-up,
+  .arrow-down {
+    top: -14px;
+    bottom: -14px;
+    border-left-width: 7px;
+    border-right-width: 7px;
+    border-bottom-width: 10px;
+    border-top-width: 10px;
+  }
+  .arrow-left,
+  .arrow-right {
+    left: -14px;
+    right: -14px;
+    border-top-width: 7px;
+    border-bottom-width: 7px;
+    border-right-width: 10px;
+    border-left-width: 10px;
+  }
 }
 
 @media (hover: hover) {
@@ -645,4 +715,33 @@ canvas {
 }
 .glow-mode .winner-overlay h2 {
     color: #b48cff;
+}
+
+.joystick-tip {
+  position: absolute;
+  bottom: 110%; /* above joystick */
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(145deg, #ffcfe7, #ff9ac2);
+  color: #191970;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  padding: 6px 8px;
+  border: 2px solid #ff9ac2;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 200;
+  box-shadow: 0 2px 6px rgba(255, 154, 194, 0.5);
+  animation: tooltipFade 4s forwards;
+}
+
+@keyframes tooltipFade {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (hover: hover) {
+  /* hide tooltip on desktop */
+  .joystick-tip { display: none !important; }
 }
