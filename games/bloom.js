@@ -357,11 +357,27 @@ function triggerLose(){
 }
 
 function endGame(){
-  // show global game over UI or winner overlay
-  if(score >= 55){
+  // Tiered reward system
+  const rewardTiers = [
+    { points: 65, reward: '50% de descuento', code: 'NAIOADS' },
+    { points: 55, reward: '25% de descuento', code: 'UEONSK' }, // existing win level
+    { points: 45, reward: '15% de descuento', code: 'SNAIOADS' },
+    { points: 35, reward: '10% de descuento', code: 'XJHO9HN' },
+    { points: 20, reward: 'Envío gratis',      code: 'NJK92NL' }
+  ];
+
+  const achievedTier = rewardTiers.find(t => score >= t.points);
+
+  if (achievedTier) {
     const overlay = document.getElementById('winnerOverlay');
-    const numSpan = document.getElementById('winnerNumber');
+    const numSpan  = document.getElementById('winnerNumber');
     if(numSpan){ window.getGlobalWinnerNumber().then(n=>{ numSpan.textContent = n; }); }
+
+    // Dynamic reward copy
+    const discountMsg = overlay.querySelector('.discount-msg');
+    if(discountMsg){
+      discountMsg.innerHTML = `Has ganado un ${achievedTier.reward} en tu próxima compra de NipSkin!<br>Usa este código en nuestra tienda para reclamar tu premio:<br><strong>${achievedTier.code}</strong>`;
+    }
 
     overlay.classList.remove('hidden');
     document.querySelector('.game-ui').style.display = 'block';
@@ -369,9 +385,7 @@ function endGame(){
 
     const wr = document.getElementById('winnerRestartBtn');
     const wm = document.getElementById('winnerMenuBtn');
-    if(wr){
-      wr.onclick = ()=>{ overlay.classList.add('hidden'); document.body.classList.remove('winner-mode'); reset(); startMainLoop();};
-    }
+    if(wr){ wr.onclick = ()=>{ overlay.classList.add('hidden'); document.body.classList.remove('winner-mode'); reset(); startMainLoop();}; }
     if(wm){ wm.onclick = ()=>{ document.body.classList.remove('winner-mode'); window.returnToMenu && window.returnToMenu(); }; }
   } else {
     const final=document.getElementById('finalScore');

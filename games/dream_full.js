@@ -332,7 +332,7 @@ function drawPlayer() {
     const spriteHeight = 48;
     // Guard against image not yet loaded (drawImage throws if width/height 0)
     if (img.complete && img.naturalWidth > 0) {
-        ctx.drawImage(img, player.x + player.width / 2 - spriteWidth / 2, player.y + player.height - spriteHeight, spriteWidth, spriteHeight);
+    ctx.drawImage(img, player.x + player.width / 2 - spriteWidth / 2, player.y + player.height - spriteHeight, spriteWidth, spriteHeight);
     }
     ctx.restore();
 }
@@ -684,12 +684,29 @@ function startGame() {
 // Game over
 function gameOver() {
     gameState = 'gameOver';
-    if(score >= 45){
-        // Special winner screen
+    // Determine if the player qualifies for a tiered reward
+    const rewardTiers = [
+        { points: 55, reward: '50% de descuento', code: 'NAIOADS' },
+        { points: 45, reward: '25% de descuento', code: 'UEONSK' },
+        { points: 35, reward: '15% de descuento', code: 'SNAIOADS' },
+        { points: 25, reward: '10% de descuento', code: 'XJHO9HN' },
+        { points: 20, reward: 'Envío gratis',      code: 'NJK92NL' }
+    ];
+
+    const achievedTier = rewardTiers.find(t => score >= t.points);
+
+    if (achievedTier) {
+        // Special winner screen with tiered rewards
         const overlay = document.getElementById('winnerOverlay');
         const numberSpan = document.getElementById('winnerNumber');
-        if(numberSpan){
-          window.getGlobalWinnerNumber().then(n=>{ numberSpan.textContent = n; });
+        if (numberSpan) {
+            window.getGlobalWinnerNumber().then(n => { numberSpan.textContent = n; });
+        }
+
+        // Update dynamic reward copy
+        const discountMsg = overlay.querySelector('.discount-msg');
+        if (discountMsg) {
+            discountMsg.innerHTML = `Has ganado un ${achievedTier.reward} en tu próxima compra de NipSkin!<br>Usa este código en nuestra tienda para reclamar tu premio:<br><strong>${achievedTier.code}</strong>`;
         }
 
         overlay.classList.remove('hidden');
@@ -698,20 +715,25 @@ function gameOver() {
 
         const wr = document.getElementById('winnerRestartBtn');
         const wm = document.getElementById('winnerMenuBtn');
-        if(wr){
-            wr.onclick = ()=>{
+        if (wr) {
+            wr.onclick = () => {
                 overlay.classList.add('hidden');
                 document.body.classList.remove('winner-mode');
                 startGame();
             };
         }
-        if(wm){ wm.onclick = ()=>{ document.body.classList.remove('winner-mode'); window.returnToMenu && window.returnToMenu(); }; }
+        if (wm) {
+            wm.onclick = () => {
+                document.body.classList.remove('winner-mode');
+                window.returnToMenu && window.returnToMenu();
+            };
+        }
     } else {
-        finalScoreElement.textContent = score;
-        gameOverDiv.classList.remove('hidden');
-        // Hide start button so only PLAY AGAIN shows
-        startBtn.classList.add('hidden');
-        document.querySelector('.game-ui').style.display = 'block';
+    finalScoreElement.textContent = score;
+    gameOverDiv.classList.remove('hidden');
+    // Hide start button so only PLAY AGAIN shows
+    startBtn.classList.add('hidden');
+    document.querySelector('.game-ui').style.display = 'block';
 
         // Re-attach PLAY AGAIN and MAIN MENU behaviour without duplicate listeners
         const restart = document.getElementById('restartBtn');
