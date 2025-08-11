@@ -353,8 +353,8 @@ window.returnToMenu = returnToMenu;
 // -------- Global winner counter helper (Cloudflare Worker) --------
 window.getGlobalWinnerNumber = async function () {
   const res = await fetch(
-    "https://winner-counter.luckyzee.workers.dev?inc",  // note ?inc
-    { method: "GET" }               // simple request → no CORS pre-flight
+    "https://winner-counter.luckyzee.workers.dev/increment",
+    { method: "POST" }
   );
   return await res.text();
 };
