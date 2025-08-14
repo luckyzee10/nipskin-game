@@ -117,6 +117,14 @@ body {
     min-height: 50px;
     touch-action: manipulation;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    
+    /* Disable text selection and mobile highlighting */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .left-btn, .right-btn {
@@ -142,6 +150,11 @@ body {
     transform: translate(-50%, -50%);
     text-align: center;
     z-index: 10;
+}
+
+/* Move winner overlay down by ~50px */
+body.winner-mode .game-ui {
+    top: 42%;
 }
 
 .start-btn, .restart-btn {
@@ -589,6 +602,47 @@ canvas {
     background: rgba(255, 100, 100, 0.9);
 }
 
+.website-link {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #a8d8ea; /* Default baby blue for Dream Chaser & Bloom Boss */
+    color: #2c3e50;
+    text-decoration: none;
+    border-radius: 25px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 3px solid #7fb3d3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.website-link:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-color: #fff;
+    background: #7fb3d3; /* Slightly darker on hover */
+}
+
+.website-link:active {
+    transform: scale(0.95);
+}
+
+/* Game-specific website link colors */
+body.glow-mode .website-link {
+    background: #ffc2d1; /* Pastel pink for Glow Getter's purple endscreen */
+    color: #6b2c91;
+    border-color: #ff9bb5;
+}
+
+body.glow-mode .website-link:hover {
+    background: #ff9bb5; /* Slightly darker pink on hover */
+    border-color: #fff;
+}
+
 .menu-subtitle {
     font-family: 'Press Start 2P', cursive;
     font-size: 16px;
@@ -701,31 +755,32 @@ canvas {
 
 .winner-overlay {
     background: rgba(255, 192, 203, 0.95); /* soft pink backdrop */
-    padding: 20px;
+    padding: 16px; /* reduced from 20px */
     border: 4px solid #ff9ac2;
     border-radius: 12px;
     color: #191970;
     text-align: center;
-    max-width: 320px;
-    max-height: 80vh; /* cap height to 80% of viewport */
+    width: 310px; /* optimized width */
+    max-width: 90vw; /* fallback for very small screens */
+    max-height: 70vh; /* reduced to prevent overflow */
     overflow-y: auto; /* scroll if content is too tall */
 }
 
 .winner-overlay h2 {
-    font-size: 14px; /* 15% smaller */
+    font-size: 11px; /* reduced further for better fit */
     color: #ff4fa3;
-    margin-bottom: 12px;
+    margin-bottom: 8px; /* reduced margin */
 }
 
 .winner-overlay p {
-    font-size: 12px; /* 15% smaller */
-    line-height: 1.6;
-    margin-bottom: 12px;
+    font-size: 10px; /* reduced further for better fit */
+    line-height: 1.4; /* tighter line height */
+    margin-bottom: 8px; /* reduced margin */
 }
 
 .winner-overlay .discount-msg {
-    font-size: 12px; /* 15% smaller */
-    line-height: 1.6;
+    font-size: 10px; /* reduced further for better fit */
+    line-height: 1.4; /* tighter line height */
 }
 
 /* Ensure stacked buttons have spacing in winner overlay */
@@ -740,10 +795,10 @@ canvas {
 /* Mobile-specific positioning for winner overlay */
 @media (max-width: 480px) {
   body.winner-mode .game-ui{
-    top: 40%; /* slightly lower on mobile to prevent top bleeding */
+    top: 45%; /* adjusted lower to match desktop positioning */
   }
   .winner-overlay {
-    max-height: 70vh; /* even more conservative on mobile */
+    max-height: 60vh; /* even more conservative on mobile */
     padding: 16px; /* smaller padding on mobile */
   }
 }
