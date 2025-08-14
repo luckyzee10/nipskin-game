@@ -370,11 +370,33 @@ window.returnToMenu = returnToMenu;
 
 // -------- Global winner counter helper (Cloudflare Worker) --------
 window.getGlobalWinnerNumber = async function () {
-  const res = await fetch(
-    "https://winner-counter.luckyzee.workers.dev/increment",
-    { method: "POST" }
-  );
-  return await res.text();
+  // Prevent rapid duplicate calls with a simple debounce
+  const now = Date.now();
+  const lastCall = window.getGlobalWinnerNumber.lastCall || 0;
+  
+  if (now - lastCall < 5000) { // 5 second debounce
+    console.log('Winner counter call debounced - too soon since last call');
+    return window.getGlobalWinnerNumber.lastResult || "1";
+  }
+  
+  try {
+    console.log('Calling winner counter API...');
+    const res = await fetch(
+      "https://winner-counter.luckyzee.workers.dev/increment",
+      { method: "POST" }
+    );
+    const result = await res.text();
+    
+    // Store for debounce
+    window.getGlobalWinnerNumber.lastCall = now;
+    window.getGlobalWinnerNumber.lastResult = result;
+    
+    console.log('Winner counter result:', result);
+    return result;
+  } catch (error) {
+    console.error('Winner counter error:', error);
+    return "1"; // Fallback
+  }
 };
 
 // -------- Audio System --------
