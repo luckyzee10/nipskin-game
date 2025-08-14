@@ -98,6 +98,20 @@ function disableGameBG(){
   };
 }
 
+// Helper to show the winner overlay centered over the canvas
+function showWinnerFrame(){
+  const frame = document.getElementById('winnerFrame');
+  const canvas = document.getElementById('gameCanvas');
+  if(!frame || !canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  frame.style.position = 'fixed';
+  frame.style.left = `${rect.left}px`;
+  frame.style.top = `${rect.top}px`;
+  frame.style.width = `${rect.width}px`;
+  frame.style.height = `${rect.height}px`;
+  frame.classList.remove('hidden');
+}
+
 // ---------- Generic intro video helper ----------
 async function playIntro(src){
   const overlay = document.getElementById('introOverlay');
@@ -318,6 +332,10 @@ backBtn.addEventListener('click', returnToMenu);
 
 function returnToMenu(){
   if (currentStop){ try{currentStop();}catch(e){} currentStop=null; }
+  // Stop any playing background music
+  if (window.audioManager) {
+    window.audioManager.stopBGMusic();
+  }
   // remove glow-mode when leaving game
   document.body.classList.remove('glow-mode');
   document.body.classList.remove('dream-mode');
@@ -359,8 +377,220 @@ window.getGlobalWinnerNumber = async function () {
   return await res.text();
 };
 
+// -------- Audio System --------
+class AudioManager {
+  constructor() {
+    this.bgMusic = null;
+    this.currentTrack = null;
+    this.isEnabled = false;
+    this.volume = 0.3; // 30% volume by default
+    this.sfxVolume = 0.4; // 40% volume for sound effects
+    this.sfxCache = new Map(); // Cache for sound effects
+    this.wasPausedByBackground = false; // Track if paused by background
+  }
+
+  // Initialize audio (call after user interaction)
+  init() {
+    this.isEnabled = true;
+    // Create and play a silent audio to unlock audio context on mobile
+    this.unlockAudio();
+  }
+
+  // Unlock audio context for mobile browsers
+  unlockAudio() {
+    try {
+      const silentAudio = new Audio();
+      silentAudio.volume = 0;
+      silentAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+      const playPromise = silentAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          silentAudio.pause();
+          silentAudio.currentTime = 0;
+        }).catch(() => {
+          // Silent failure - audio unlock didn't work
+        });
+      }
+    } catch (error) {
+      // Silent failure - audio unlock didn't work
+    }
+  }
+
+  // Load and play background music
+  playBGMusic(trackName) {
+    if (!this.isEnabled) return;
+    
+    // Stop current track if playing
+    this.stopBGMusic();
+    
+    try {
+      this.bgMusic = new Audio(`assets/music/${trackName}_music.mp3`);
+      this.bgMusic.volume = this.volume;
+      this.bgMusic.loop = true;
+      this.currentTrack = trackName;
+      
+      // Play with error handling
+      const playPromise = this.bgMusic.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log('Audio play failed:', error);
+        });
+      }
+    } catch (error) {
+      console.log('Audio loading failed:', error);
+    }
+  }
+
+  // Stop background music
+  stopBGMusic() {
+    if (this.bgMusic) {
+      this.bgMusic.pause();
+      this.bgMusic.currentTime = 0;
+      this.bgMusic = null;
+      this.currentTrack = null;
+    }
+  }
+
+  // Play sound effect
+  playSFX(sfxName) {
+    if (!this.isEnabled) return;
+    
+    try {
+      // Use cached audio or create new one
+      let audio = this.sfxCache.get(sfxName);
+      if (!audio) {
+        audio = new Audio(`assets/music/${sfxName}.mp3`);
+        this.sfxCache.set(sfxName, audio);
+      }
+      
+      // Reset to start and play
+      audio.currentTime = 0;
+      audio.volume = this.sfxVolume;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log('SFX play failed:', error);
+        });
+      }
+    } catch (error) {
+      console.log('SFX loading failed:', error);
+    }
+  }
+
+  // Toggle audio on/off
+  toggle() {
+    this.isEnabled = !this.isEnabled;
+    if (!this.isEnabled) {
+      this.stopBGMusic();
+    }
+    return this.isEnabled;
+  }
+
+  // Set volume (0.0 to 1.0)
+  setVolume(vol) {
+    this.volume = Math.max(0, Math.min(1, vol));
+    if (this.bgMusic) {
+      this.bgMusic.volume = this.volume;
+    }
+  }
+
+  // Set SFX volume (0.0 to 1.0)
+  setSFXVolume(vol) {
+    this.sfxVolume = Math.max(0, Math.min(1, vol));
+  }
+
+  // Pause audio when page loses focus/visibility
+  pauseOnBackground() {
+    if (this.bgMusic && !this.bgMusic.paused) {
+      this.bgMusic.pause();
+      this.wasPausedByBackground = true;
+    }
+  }
+
+  // Resume audio when page regains focus/visibility
+  resumeOnForeground() {
+    if (this.bgMusic && this.wasPausedByBackground && this.isEnabled) {
+      const playPromise = this.bgMusic.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log('Audio resume failed:', error);
+        });
+      }
+      this.wasPausedByBackground = false;
+    }
+  }
+}
+
+// Global audio manager instance
+window.audioManager = new AudioManager();
+
+// Audio toggle button functionality
+function initAudioToggle() {
+  const audioToggle = document.getElementById('audioToggle');
+  if (!audioToggle) return;
+
+  audioToggle.addEventListener('click', () => {
+    // Initialize audio on first interaction if not already done
+    if (!window.audioManager.isEnabled) {
+      window.audioManager.init();
+    }
+    const isEnabled = window.audioManager.toggle();
+    audioToggle.textContent = isEnabled ? '🔊' : '🔇';
+    audioToggle.classList.toggle('muted', !isEnabled);
+  });
+}
+
+// Initialize audio on any user interaction (mobile-friendly)
+function initMobileAudio() {
+  const initAudio = () => {
+    if (!window.audioManager.isEnabled) {
+      window.audioManager.init();
+    }
+  };
+
+  // Add listeners to all interactive elements
+  document.addEventListener('touchstart', initAudio, { once: true, passive: true });
+  document.addEventListener('click', initAudio, { once: true, passive: true });
+  
+  // Character selection buttons
+  const characterBtns = document.querySelectorAll('.character-btn');
+  characterBtns.forEach(btn => {
+    btn.addEventListener('touchstart', initAudio, { once: true, passive: true });
+    btn.addEventListener('click', initAudio, { once: true, passive: true });
+  });
+}
+
+// Handle page visibility changes (phone lock, app switching, etc.)
+function initBackgroundAudioControl() {
+  // Pause audio when page becomes hidden (phone lock, app switch, etc.)
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      window.audioManager.pauseOnBackground();
+    } else {
+      window.audioManager.resumeOnForeground();
+    }
+  });
+
+  // Additional fallbacks for older browsers
+  window.addEventListener('blur', () => {
+    window.audioManager.pauseOnBackground();
+  });
+
+  window.addEventListener('focus', () => {
+    window.audioManager.resumeOnForeground();
+  });
+
+  // Handle page unload (browser close, navigation away)
+  window.addEventListener('beforeunload', () => {
+    window.audioManager.stopBGMusic();
+  });
+}
+
 // ensure menu visible on load
 window.addEventListener('DOMContentLoaded', ()=>{
   showGame(false);
   mainMenu.style.display='flex';
+  initAudioToggle();
+  initMobileAudio();
+  initBackgroundAudioControl();
 }); 

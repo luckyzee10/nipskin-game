@@ -28,6 +28,7 @@ body {
     padding: 10px 10px 80px 10px; /* space for controls */
     max-width: 400px;
     margin: 0 auto;
+    position: relative; /* anchor absolute overlays inside the game area */
 }
 
 .game-header {
@@ -66,7 +67,7 @@ body {
 }
 
 .score {
-    font-size: 8px;
+    font-size: 12px;
     color: white;
     background: rgba(25, 25, 112, 0.8);
     padding: 4px 8px;
@@ -104,7 +105,7 @@ body {
 
 .control-btn {
     font-family: 'Press Start 2P', cursive;
-    font-size: 10px;
+    font-size: 14px;
     padding: 15px;
     border: 3px solid white;
     border-radius: 8px;
@@ -136,7 +137,7 @@ body {
 
 .game-ui {
     position: absolute;
-    top: 50%;
+    top: 35%;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -145,7 +146,7 @@ body {
 
 .start-btn, .restart-btn {
     font-family: 'Press Start 2P', cursive;
-    font-size: 10px;
+    font-size: 14px;
     padding: 15px 25px;
     border: 3px solid white;
     border-radius: 8px;
@@ -172,24 +173,28 @@ body {
     border: 3px solid #4169e1;
     border-radius: 12px;
     color: white;
+    max-width: 320px;
 }
 
 .game-over h2 {
-    font-size: 12px;
+    font-size: 18px; /* keep copy larger */
     color: #87ceeb;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .game-over p {
-    font-size: 8px;
-    margin-bottom: 15px;
+    font-size: 14px; /* keep copy larger */
+    line-height: 1.6;
+    margin-bottom: 12px;
 }
 
 /* Add spacing for stacked buttons in Game Over overlay */
 .game-over .restart-btn {
     display: block;
     width: 100%;
-    margin: 11px 0;
+    margin: 10px 0;
+    font-size: 10px; /* keep buttons small */
+    padding: 12px 18px;
 }
 
 .hidden {
@@ -222,7 +227,7 @@ body {
     bottom: 20px;
     right: 20px;
     font-family: 'Press Start 2P', cursive;
-    font-size: 10px;
+    font-size: 14px;
     padding: 10px 20px;
     border: 3px solid #fff;
     background: #4169e1;
@@ -380,9 +385,9 @@ body {
     }
     
     .control-btn {
-        padding: 12px;
-        font-size: 8px;
-        min-height: 45px;
+        padding: 14px;
+        font-size: 12px;
+        min-height: 48px;
     }
     
     .left-btn, .right-btn {
@@ -543,8 +548,8 @@ canvas {
 @media (max-width: 480px) {
     .menu-btn,
     .back-btn {
-        font-size: 12px;
-        padding: 14px 18px;
+        font-size: 14px;
+        padding: 16px 20px;
         box-shadow: 0 0 0 3px #191970, 3px 3px 0 3px #000;
     }
     .back-btn {
@@ -560,9 +565,33 @@ canvas {
     margin-bottom: 32px;
 }
 
+.audio-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #333;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.audio-toggle:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+.audio-toggle.muted {
+    background: rgba(255, 100, 100, 0.9);
+}
+
 .menu-subtitle {
     font-family: 'Press Start 2P', cursive;
-    font-size: 12px;
+    font-size: 16px;
     color: #191970;
     letter-spacing: 1px;
     margin-bottom: 48px;
@@ -601,7 +630,7 @@ canvas {
 
 .character-btn {
     font-family: 'Press Start 2P', cursive;
-    font-size: 14px;
+    font-size: 16px;
     padding: 20px 28px;
     border: 4px solid #fff;
     border-radius: 50px; /* pill */
@@ -672,39 +701,50 @@ canvas {
 
 .winner-overlay {
     background: rgba(255, 192, 203, 0.95); /* soft pink backdrop */
-    padding: 24px;
+    padding: 20px;
     border: 4px solid #ff9ac2;
     border-radius: 12px;
     color: #191970;
     text-align: center;
-    max-width: 300px;
+    max-width: 320px;
+    max-height: 80vh; /* cap height to 80% of viewport */
+    overflow-y: auto; /* scroll if content is too tall */
 }
 
 .winner-overlay h2 {
-    font-size: 14px;
+    font-size: 14px; /* 15% smaller */
     color: #ff4fa3;
     margin-bottom: 12px;
 }
 
 .winner-overlay p {
-    font-size: 10px;
+    font-size: 12px; /* 15% smaller */
+    line-height: 1.6;
     margin-bottom: 12px;
 }
 
 .winner-overlay .discount-msg {
-    font-size: 9px;
+    font-size: 12px; /* 15% smaller */
+    line-height: 1.6;
 }
 
 /* Ensure stacked buttons have spacing in winner overlay */
 .winner-overlay .restart-btn {
     display: block;
     width: 100%;
-    margin: 11px 0;
+    margin: 10px 0;
+    font-size: 10px; /* smaller buttons */
+    padding: 10px 16px; /* reduced height */
 }
 
-@media (min-width:0px){
+/* Mobile-specific positioning for winner overlay */
+@media (max-width: 480px) {
   body.winner-mode .game-ui{
-    top:45%;
+    top: 40%; /* slightly lower on mobile to prevent top bleeding */
+  }
+  .winner-overlay {
+    max-height: 70vh; /* even more conservative on mobile */
+    padding: 16px; /* smaller padding on mobile */
   }
 }
 

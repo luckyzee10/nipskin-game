@@ -11,6 +11,7 @@
         <!-- BEGINNING MENU -->
         <div id="mainMenu" class="main-menu">
             <img src="assets/Shine%20Up%20Logo.png" alt="Shine-Up Logo" class="menu-logo" />
+            <button id="audioToggle" class="audio-toggle" title="Toggle Audio">🔊</button>
             <h2 class="menu-subtitle">CHOOSE&nbsp; YOUR&nbsp; CHARACTER</h2>
 
             <div class="character-row" id="rowDream">
@@ -61,7 +62,11 @@
             <div id="winnerOverlay" class="winner-overlay hidden">
                 <h2>Felicitaciones!</h2>
                 <p>Eres el ganador número: <span id="winnerNumber">1</span></p>
-                <p class="discount-msg">Has ganado un 25% de descuento en tu próxima compra de NipSkin!<br>¡Tómale un pantallazo a esta imagen y envíanosla por WhatsApp para reclamar tu descuento!</p>
+                <div class="discount-msg">
+                    <p>Has ganado un 25% de descuento en tu próxima compra de NipSkin!</p>
+                    <p>Usa este código en nuestra tienda para reclamar tu premio:</p>
+                    <p class="discount-code"><strong>ABC123</strong></p>
+                </div>
                 <button id="winnerRestartBtn" class="restart-btn">JUGAR DE NUEVO</button>
                 <button id="winnerMenuBtn" class="restart-btn">MENÚ PRINCIPAL</button>
             </div>
@@ -88,6 +93,6 @@
 
     </div>
     
-    <script type="module" src="main.js?v=2"></script>
+    <script type="module" src="main.js?v=3"></script>
 </body>
 </html> 

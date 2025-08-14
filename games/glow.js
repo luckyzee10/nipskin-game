@@ -80,36 +80,57 @@ function start(){
   rightBtn=document.getElementById('rightBtn');
   jumpBtn=document.getElementById('jumpBtn');
 
-  const onLeftDown=()=>keys.left=true;
-  const onLeftUp=()=>keys.left=false;
-  const onRightDown=()=>keys.right=true;
-  const onRightUp=()=>keys.right=false;
-  const onShootDown=()=>keys.shoot=true;
-  const onShootUp=()=>keys.shoot=false;
+  const onLeftDown=(e)=>{ try{leftBtn.setPointerCapture(e.pointerId);}catch(_){ } keys.left=true; };
+  const onLeftUp=()=>{ keys.left=false; try{leftBtn.releasePointerCapture && leftBtn.releasePointerCapture();}catch(_){ } };
+  const onRightDown=(e)=>{ try{rightBtn.setPointerCapture(e.pointerId);}catch(_){ } keys.right=true; };
+  const onRightUp=()=>{ keys.right=false; try{rightBtn.releasePointerCapture && rightBtn.releasePointerCapture();}catch(_){ } };
+  const onShootDown=(e)=>{ try{jumpBtn.setPointerCapture(e.pointerId);}catch(_){ } keys.shoot=true; };
+  const onShootUp=()=>{ keys.shoot=false; try{jumpBtn.releasePointerCapture && jumpBtn.releasePointerCapture();}catch(_){ } };
 
-  leftBtn.addEventListener('pointerdown',onLeftDown);
-  leftBtn.addEventListener('pointerup',onLeftUp);
+  leftBtn.addEventListener('pointerdown',onLeftDown, {passive:false});
+  leftBtn.addEventListener('pointerup',onLeftUp, {passive:false});
+  leftBtn.addEventListener('pointercancel',onLeftUp, {passive:false});
+  leftBtn.addEventListener('pointerleave',onLeftUp, {passive:false});
   rightBtn.addEventListener('pointerdown',onRightDown);
   rightBtn.addEventListener('pointerup',onRightUp);
+  rightBtn.addEventListener('pointercancel',onRightUp);
+  rightBtn.addEventListener('pointerleave',onRightUp);
   jumpBtn.addEventListener('pointerdown',onShootDown);
   jumpBtn.addEventListener('pointerup',onShootUp);
+  jumpBtn.addEventListener('pointercancel',onShootUp);
+  jumpBtn.addEventListener('pointerleave',onShootUp);
 
   start._listeners=[
-    [leftBtn,'pointerdown',onLeftDown],[leftBtn,'pointerup',onLeftUp],
-    [rightBtn,'pointerdown',onRightDown],[rightBtn,'pointerup',onRightUp],
-    [jumpBtn,'pointerdown',onShootDown],[jumpBtn,'pointerup',onShootUp]
+    [leftBtn,'pointerdown',onLeftDown],[leftBtn,'pointerup',onLeftUp],[leftBtn,'pointercancel',onLeftUp],[leftBtn,'pointerleave',onLeftUp],
+    [rightBtn,'pointerdown',onRightDown],[rightBtn,'pointerup',onRightUp],[rightBtn,'pointercancel',onRightUp],[rightBtn,'pointerleave',onRightUp],
+    [jumpBtn,'pointerdown',onShootDown],[jumpBtn,'pointerup',onShootUp],[jumpBtn,'pointercancel',onShootUp],[jumpBtn,'pointerleave',onShootUp]
   ];
   reset();
   document.addEventListener('keydown',keyDown);
   document.addEventListener('keyup',keyUp);
+  // Clear stuck inputs when tab loses focus
+  const clearKeys=()=>{ keys.left=false; keys.right=false; keys.shoot=false; };
+  window.addEventListener('blur', clearKeys);
+  start._listeners.push([window,'blur',clearKeys]);
   rafId=requestAnimationFrame(loop);
   document.getElementById('startBtn').classList.add('hidden');
+
+  // Initialize and start background music
+  if (window.audioManager) {
+    window.audioManager.init();
+    window.audioManager.playBGMusic('glowgetter');
+  }
 }
 function stop(){
   cancelAnimationFrame(rafId);
   document.removeEventListener('keydown',keyDown);
   document.removeEventListener('keyup',keyUp);
   if(start._listeners){ start._listeners.forEach(([el,ev,fn])=>el.removeEventListener(ev,fn)); }
+  
+  // Stop background music
+  if (window.audioManager) {
+    window.audioManager.stopBGMusic();
+  }
 }
 function reset(){
   player.x = canvas.width/2-PLAYER_W/2;
@@ -155,6 +176,11 @@ function update(){
   if(keys.shoot && canShoot){
     bullets.push({x:player.x+PLAYER_W/2-BULLET_W/2,y:player.y});
     canShoot = false;
+    
+    // Play shoot sound effect
+    if (window.audioManager) {
+      window.audioManager.playSFX('glowgetter_shoot');
+    }
   }
   if(!keys.shoot){
     canShoot = true;
@@ -178,6 +204,12 @@ function update(){
     if(enemies[i].y>canvas.height){
       enemies.splice(i,1);
       life -= 20; // lose 20 life per escape
+      
+      // Play damage sound when meteor escapes
+      if (window.audioManager) {
+        window.audioManager.playSFX('characterdamage');
+      }
+      
       if(life <= 0){ triggerLose(); return; }
     }
   }
@@ -192,7 +224,13 @@ function update(){
     for(let ei=enemies.length-1;ei>=0;ei--){
       const e=enemies[ei];
       if(b.x<e.x+e.w && b.x+BULLET_W>e.x && b.y<e.y+e.h && b.y+BULLET_H>e.y){
-        bullets.splice(bi,1); enemies.splice(ei,1); score+=2; updateScore(); break;
+        bullets.splice(bi,1); enemies.splice(ei,1); score+=2; updateScore();
+        
+        // Play enemy hit sound effect
+        if (window.audioManager) {
+          window.audioManager.playSFX('glowgetter_enemy_hit');
+        }
+        break;
       }
     }
   }
@@ -200,6 +238,10 @@ function update(){
   // Player collisions
   for(const e of enemies){
     if(player.x<e.x+e.w && player.x+PLAYER_W>e.x && player.y<e.y+e.h && player.y+PLAYER_H>e.y){
+      // Play character damage sound effect
+      if (window.audioManager) {
+        window.audioManager.playSFX('characterdamage');
+      }
       triggerLose(); return;
     }
   }
@@ -207,6 +249,11 @@ function update(){
     const d=diamonds[i];
     if(player.x<d.x+DIAMOND_W && player.x+PLAYER_W>d.x && player.y<d.y+DIAMOND_H && player.y+PLAYER_H>d.y){
       diamonds.splice(i,1); score+=1; updateScore();
+      
+      // Play diamond collection sound effect
+      if (window.audioManager) {
+        window.audioManager.playSFX('glowgetter_diamond_hit');
+      }
     }
   }
 }
@@ -293,7 +340,11 @@ function triggerLose(){
     // Dynamic reward copy
     const discountMsg = overlay.querySelector('.discount-msg');
     if(discountMsg){
-      discountMsg.innerHTML = `Has ganado un ${achievedTier.reward} en tu próxima compra de NipSkin!<br>Usa este código en nuestra tienda para reclamar tu premio:<br><strong>${achievedTier.code}</strong>`;
+      discountMsg.innerHTML = `
+        <p>Has ganado un ${achievedTier.reward} en tu próxima compra de NipSkin!</p>
+        <p>Usa este código en nuestra tienda para reclamar tu premio:</p>
+        <p class=\"discount-code\"><strong>${achievedTier.code}</strong></p>
+      `;
     }
 
     overlay.classList.remove('hidden');

@@ -547,6 +547,11 @@ function update() {
         player.onGround = false;
         jumpBuffer = 0; // Reset buffer when jump is executed
         jumpPressed = true;
+        
+        // Play jump sound effect
+        if (window.audioManager) {
+            window.audioManager.playSFX('dreamchaser_jump');
+        }
     }
     
     // Jump buffer system - more aggressive for high-pressure moments
@@ -566,6 +571,11 @@ function update() {
             player.velocityY = player.jumpPower;
             jumpBuffer = 0;
             jumpPressed = true;
+            
+            // Play jump sound effect for buffered jump
+            if (window.audioManager) {
+                window.audioManager.playSFX('dreamchaser_jump');
+            }
         }
     }
     
@@ -679,11 +689,22 @@ function startGame() {
     document.querySelector('.game-ui').style.display = 'none';
     gameOverDiv.classList.add('hidden');
     startBtn.classList.add('hidden'); // hide after first press
+
+    // Initialize and start background music
+    if (window.audioManager) {
+        window.audioManager.init();
+        window.audioManager.playBGMusic('dreamchaser');
+    }
 }
 
 // Game over
 function gameOver() {
     gameState = 'gameOver';
+    
+    // Stop background music
+    if (window.audioManager) {
+        window.audioManager.stopBGMusic();
+    }
     // Determine if the player qualifies for a tiered reward
     const rewardTiers = [
         { points: 55, reward: '50% de descuento', code: 'NAIOADS' },
@@ -706,7 +727,11 @@ function gameOver() {
         // Update dynamic reward copy
         const discountMsg = overlay.querySelector('.discount-msg');
         if (discountMsg) {
-            discountMsg.innerHTML = `Has ganado un ${achievedTier.reward} en tu próxima compra de NipSkin!<br>Usa este código en nuestra tienda para reclamar tu premio:<br><strong>${achievedTier.code}</strong>`;
+            discountMsg.innerHTML = `
+                <p>Has ganado un ${achievedTier.reward} en tu próxima compra de NipSkin!</p>
+                <p>Usa este código en nuestra tienda para reclamar tu premio:</p>
+                <p class="discount-code"><strong>${achievedTier.code}</strong></p>
+            `;
         }
 
         overlay.classList.remove('hidden');
@@ -756,67 +781,37 @@ function gameOver() {
 startBtn.addEventListener('click', startGame);
 
 // Touch controls
-leftBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    keys.left = true;
+// Unified pointer controls to avoid duplicate touch/click events
+function bindPointer(button, key) {
+    const onDown = (e) => {
+        e.preventDefault();
+        try { button.setPointerCapture(e.pointerId); } catch (_) {}
+        keys[key] = true;
+        if (button === jumpBtn) button.style.opacity = '0.7';
+    };
+    const clear = (e) => {
+        e && e.preventDefault();
+        keys[key] = false;
+        if (button === jumpBtn) button.style.opacity = '1';
+        try { button.releasePointerCapture && button.releasePointerCapture(e?.pointerId); } catch (_) {}
+    };
+    button.addEventListener('pointerdown', onDown, { passive: false });
+    button.addEventListener('pointerup', clear, { passive: false });
+    button.addEventListener('pointercancel', clear, { passive: false });
+    button.addEventListener('pointerleave', clear, { passive: false });
+    // Block synthetic click to prevent duplicate triggers
+    button.addEventListener('click', (e) => e.preventDefault());
+    button.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
+bindPointer(leftBtn, 'left');
+bindPointer(rightBtn, 'right');
+bindPointer(jumpBtn, 'jump');
+
+// As a safety net, clear keys when the tab loses focus (prevents "stuck" inputs)
+window.addEventListener('blur', () => {
+    keys.left = keys.right = keys.jump = false;
 });
-leftBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    keys.left = false;
-});
-
-rightBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    keys.right = true;
-});
-rightBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    keys.right = false;
-});
-
-jumpBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    keys.jump = true;
-    jumpBtn.style.opacity = '0.7'; // Visual feedback
-}, { passive: false });
-
-jumpBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    keys.jump = false;
-    jumpBtn.style.opacity = '1'; // Visual feedback
-}, { passive: false });
-
-// Add pointer events for better cross-device support
-jumpBtn.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    keys.jump = true;
-    jumpBtn.style.opacity = '0.7';
-}, { passive: false });
-
-jumpBtn.addEventListener('pointerup', (e) => {
-    e.preventDefault();
-    keys.jump = false;
-    jumpBtn.style.opacity = '1';
-}, { passive: false });
-
-// Add click events as backup
-jumpBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    keys.jump = true;
-    setTimeout(() => { keys.jump = false; }, 100); // Auto-release after 100ms
-    jumpBtn.style.opacity = '0.7';
-    setTimeout(() => { jumpBtn.style.opacity = '1'; }, 100);
-});
-
-// Mouse controls (for testing)
-leftBtn.addEventListener('mousedown', () => keys.left = true);
-leftBtn.addEventListener('mouseup', () => keys.left = false);
-rightBtn.addEventListener('mousedown', () => keys.right = true);
-rightBtn.addEventListener('mouseup', () => keys.right = false);
-jumpBtn.addEventListener('mousedown', () => keys.jump = true);
-jumpBtn.addEventListener('mouseup', () => keys.jump = false);
 
 // Keyboard controls
 document.addEventListener('keydown', (e) => {

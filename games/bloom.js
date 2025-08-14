@@ -83,7 +83,36 @@ function spawnFlower(){
 }
 function spawnCactus(){
   const half=ENTITY_SIZE/2;
-  cacti.push({x:Math.random()* (canvas.width-ENTITY_SIZE)+half, y:Math.random()*(canvas.height-100)+50, active:false, speed:0.8+Math.random()*0.4});
+  let x, y;
+  let attempts = 0;
+  const maxAttempts = 20;
+  
+  // Player starting position and safe zone
+  const playerStartX = 180;
+  const playerStartY = 280;
+  const safeZoneRadius = 80; // Safe zone around player start position
+  
+  do {
+    x = Math.random() * (canvas.width - ENTITY_SIZE) + half;
+    y = Math.random() * (canvas.height - 100) + 50;
+    
+    // Check if position is too close to player start position
+    const distanceFromPlayer = Math.sqrt(
+      Math.pow(x - playerStartX, 2) + Math.pow(y - playerStartY, 2)
+    );
+    
+    attempts++;
+    
+    // If we've tried many times and still no good position, place it far from player
+    if (attempts >= maxAttempts) {
+      x = playerStartX < canvas.width / 2 ? canvas.width - 50 : 50;
+      y = playerStartY < canvas.height / 2 ? canvas.height - 100 : 100;
+      break;
+    }
+    
+  } while (Math.sqrt(Math.pow(x - playerStartX, 2) + Math.pow(y - playerStartY, 2)) < safeZoneRadius);
+  
+  cacti.push({x: x, y: y, active: false, speed: 0.8 + Math.random() * 0.4});
 }
 
 function spawnBorderCactus(){
@@ -251,6 +280,12 @@ function start(){
     [joy,'pointerup',onJoyEnd],[joy,'pointercancel',onJoyEnd]
   );
 
+  // Initialize and start background music
+  if (window.audioManager) {
+    window.audioManager.init();
+    window.audioManager.playBGMusic('bloomboss');
+  }
+
   startMainLoop();
 }
 
@@ -262,6 +297,11 @@ function stop(){
   if(start._listeners){ start._listeners.forEach(([el,ev,fn])=>el.removeEventListener(ev,fn)); }
   clearKeys();
   const joy=document.getElementById('bloomJoystick'); if(joy) joy.classList.add('hidden');
+  
+  // Stop background music
+  if (window.audioManager) {
+    window.audioManager.stopBGMusic();
+  }
 }
 
 function loop(){
@@ -301,20 +341,36 @@ function update(){
   updateCactiActivation();
   moveActiveCacti();
 
+  // Calculate player center for consistent collision detection
+  const playerCenterX = player.x + player.w / 2;
+  const playerCenterY = player.y + player.h / 2;
+
   // collect flowers - bigger hitbox
   const collectDist = FLOWER_SIZE * 0.95;
   for(let i=flowers.length-1;i>=0;i--){
     const f=flowers[i];
-    if(Math.abs(player.x-f.x)<collectDist && Math.abs(player.y-f.y)<collectDist){
+    if(Math.abs(playerCenterX-f.x)<collectDist && Math.abs(playerCenterY-f.y)<collectDist){
       flowers.splice(i,1); score+=1; spawnFlower();
+      
+      // Play flower collection sound effect
+      if (window.audioManager) {
+        window.audioManager.playSFX('bloomboss_flower');
+      }
     }
   }
 
   // collision with cactus -> smaller hitbox
   const cactusHit = ENTITY_SIZE * 0.6;
   for(const c of cacti){
-    if(Math.abs(player.x-c.x)<cactusHit && Math.abs(player.y-c.y)<cactusHit){
-      triggerLose();
+    if(!gameOver && Math.abs(playerCenterX-c.x)<cactusHit && Math.abs(playerCenterY-c.y)<cactusHit){
+      // Play character damage sound effect
+      if (window.audioManager) {
+        window.audioManager.playSFX('characterdamage');
+      }
+      // Small delay to ensure sound starts playing before game state changes
+      setTimeout(() => {
+        triggerLose();
+      }, 50);
       break;
     }
   }
@@ -376,7 +432,11 @@ function endGame(){
     // Dynamic reward copy
     const discountMsg = overlay.querySelector('.discount-msg');
     if(discountMsg){
-      discountMsg.innerHTML = `Has ganado un ${achievedTier.reward} en tu próxima compra de NipSkin!<br>Usa este código en nuestra tienda para reclamar tu premio:<br><strong>${achievedTier.code}</strong>`;
+      discountMsg.innerHTML = `
+        <p>Has ganado un ${achievedTier.reward} en tu próxima compra de NipSkin!</p>
+        <p>Usa este código en nuestra tienda para reclamar tu premio:</p>
+        <p class=\"discount-code\"><strong>${achievedTier.code}</strong></p>
+      `;
     }
 
     overlay.classList.remove('hidden');
