@@ -320,6 +320,9 @@ function drawLifeBar(){
 }
 
 function triggerLose(){
+  // Prevent multiple calls to triggerLose in the same session
+  if(gameOver) return;
+  
   gameOver=true;
   // Tiered reward system
   const rewardTiers = [

@@ -699,6 +699,9 @@ function startGame() {
 
 // Game over
 function gameOver() {
+    // Prevent multiple calls to gameOver in the same session
+    if (gameState === 'gameOver') return;
+    
     gameState = 'gameOver';
     
     // Stop background music

@@ -413,6 +413,10 @@ function triggerLose(){
 }
 
 function endGame(){
+  // Prevent multiple calls to endGame in the same session  
+  if(endGame.called) return;
+  endGame.called = true;
+  
   // Tiered reward system
   const rewardTiers = [
     { points: 65, reward: '50% de descuento', code: 'NAIOADS' },
