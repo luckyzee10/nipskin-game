@@ -61,16 +61,23 @@
 
             <!-- Special winner overlay for Dream Chaser -->
             <div id="winnerOverlay" class="winner-overlay hidden">
-                <h2>Felicitaciones!</h2>
-                <p>Eres el ganador número: <span id="winnerNumber">1</span></p>
-                <div class="discount-msg">
-                    <p>Has ganado un 25% de descuento en tu próxima compra de NipSkin!</p>
-                    <p>Usa este código en nuestra tienda para reclamar tu premio:</p>
-                    <p class="discount-code"><strong>ABC123</strong></p>
+                <!-- Template background image -->
+                <img id="winnerTemplate" class="winner-template" src="" alt="Winner screen template" />
+                
+                <!-- Dynamic content overlay -->
+                <div class="winner-content">
+                    <p>Eres el ganador número: <span id="winnerNumber">1</span></p>
+                    <div class="discount-msg">
+                        <p>Has ganado un 25% de descuento en tu próxima compra de NipSkin!</p>
+                        <p>Usa este código en nuestra tienda para reclamar tu premio:</p>
+                        <p class="discount-code"><strong>ABC123</strong></p>
+                    </div>
+                    <a href="https://nipskin.com/" target="_blank" class="website-link">Visita Nuestra Tienda</a>
                 </div>
-                <a href="https://nipskin.com/" target="_blank" class="website-link">Visita Nuestra Tienda</a>
-                <button id="winnerRestartBtn" class="restart-btn">JUGAR DE NUEVO</button>
-                <button id="winnerMenuBtn" class="restart-btn">MENÚ PRINCIPAL</button>
+                
+                <!-- Invisible clickable buttons over template -->
+                <button id="winnerRestartBtn" class="template-btn restart-btn-overlay">JUGAR DE NUEVO</button>
+                <button id="winnerMenuBtn" class="template-btn menu-btn-overlay">MENÚ PRINCIPAL</button>
             </div>
         </div>
 

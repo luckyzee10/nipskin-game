@@ -754,62 +754,215 @@ body.glow-mode .website-link:hover {
 }
 
 .winner-overlay {
-    background: rgba(255, 192, 203, 0.95); /* soft pink backdrop */
-    padding: 16px; /* reduced from 20px */
-    border: 4px solid #ff9ac2;
-    border-radius: 12px;
+    position: relative;
+    width: 300px; /* Reduced from 340px to give margin */
+    height: 440px; /* Reduced proportionally */
+    max-width: 85vw;
+    max-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.winner-template {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 1;
+}
+
+.winner-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 125px 20px 20px 20px; /* Reduced top padding by 10px */
+    box-sizing: border-box;
     color: #191970;
     text-align: center;
-    width: 310px; /* optimized width */
-    max-width: 90vw; /* fallback for very small screens */
-    max-height: 70vh; /* reduced to prevent overflow */
-    overflow-y: auto; /* scroll if content is too tall */
 }
 
-.winner-overlay h2 {
-    font-size: 11px; /* reduced further for better fit */
+.winner-content h2 {
+    font-size: 14px;
     color: #ff4fa3;
-    margin-bottom: 8px; /* reduced margin */
+    margin-bottom: 8px;
+    font-weight: bold;
 }
 
-.winner-overlay p {
-    font-size: 10px; /* reduced further for better fit */
-    line-height: 1.4; /* tighter line height */
-    margin-bottom: 8px; /* reduced margin */
+.winner-content p {
+    font-size: 9.5px; /* Reduced by ~10% from 10.5px */
+    line-height: 1.4;
+    margin-bottom: 8px;
 }
 
-.winner-overlay .discount-msg {
-    font-size: 10px; /* reduced further for better fit */
-    line-height: 1.4; /* tighter line height */
+.winner-content .discount-msg {
+    font-size: 8.5px; /* Reduced by ~10% from 9.5px */
+    line-height: 1.4;
+    margin-bottom: 4px; /* Reduced from 8px to 4px for tighter spacing */
 }
 
-/* Ensure stacked buttons have spacing in winner overlay */
-.winner-overlay .restart-btn {
-    display: block;
-    width: 100%;
-    margin: 10px 0;
-    font-size: 10px; /* smaller buttons */
-    padding: 10px 16px; /* reduced height */
+.winner-content .discount-code {
+    font-size: 10.5px; /* Reduced by ~10% from 11.5px */
+    color: #ff4fa3;
+    margin: 6px 0; /* Reduced from 8px to 6px */
 }
 
-/* Mobile-specific positioning for winner overlay */
+.winner-content .website-link {
+    display: inline-block;
+    background: #87CEEB; /* baby blue */
+    color: #191970;
+    text-decoration: none;
+    padding: 6px 13px; /* Reduced by ~20% from 8px 16px */
+    border-radius: 5px; /* Slightly smaller radius */
+    font-size: 8px; /* Reduced by ~20% from 10px */
+    margin-bottom: 8px; /* Reduced spacing */
+    border: 2px solid #5F9EA0;
+    transition: all 0.2s ease;
+    transform: scale(0.8); /* Make it 20% smaller overall */
+    margin-top: 0px; /* Reset button position */
+}
+
+.winner-content .website-link:hover {
+    background: #98D8E8;
+    border-color: #4A90A4;
+}
+
+/* Invisible clickable buttons over template */
+.template-btn {
+    position: absolute;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 3;
+    width: 100px; /* Reduced width to match smaller template */
+    height: 25px; /* Reduced height to match template buttons */
+    font-size: 0; /* Hide text */
+    color: transparent;
+}
+
+.restart-btn-overlay {
+    bottom: 108px; /* Moved up 3px more for "JUGAR DE NUEVO" button */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.menu-btn-overlay {
+    bottom: 73px; /* Moved up 3px more for "MENÚ PRINCIPAL" button */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+
+/* Bloom Boss specific adjustments */
+.bloom-mode .winner-overlay {
+    transform: translateY(-25px); /* Raise template 25px */
+}
+
+.bloom-mode .winner-content {
+    padding: 120px 20px 20px 20px; /* Increase top padding by 15px to lower copy */
+}
+
+/* Bloom Boss specific button positioning */
+.bloom-mode .restart-btn-overlay {
+    bottom: 85px; /* Lower by 8px more from 93px */
+}
+
+.bloom-mode .menu-btn-overlay {
+    bottom: 50px; /* Lower by 8px more from 58px */
+}
+
+.bloom-mode .winner-content .website-link {
+    margin-top: 10px; /* Lower button by 10px */
+}
+
+/* Glow Getter specific button positioning */
+.glow-mode .restart-btn-overlay {
+    bottom: 98px; /* Lower by 10px from 108px */
+}
+
+.glow-mode .menu-btn-overlay {
+    bottom: 63px; /* Lower by 10px from 73px */
+}
+
+/* Mobile-specific adjustments */
 @media (max-width: 480px) {
-  body.winner-mode .game-ui{
-    top: 45%; /* adjusted lower to match desktop positioning */
-  }
-  .winner-overlay {
-    max-height: 60vh; /* even more conservative on mobile */
-    padding: 16px; /* smaller padding on mobile */
-  }
-}
-
-/* Glow Getter variant -> pastel purples */
-.glow-mode .winner-overlay {
-    background: rgba(230, 215, 255, 0.95);
-    border-color: #c8b2ff;
-}
-.glow-mode .winner-overlay h2 {
-    color: #b48cff;
+    body.winner-mode .game-ui {
+        top: 45%;
+    }
+    
+    .winner-overlay {
+        width: 280px;
+        height: 410px;
+    }
+    
+    .winner-content {
+        padding: 120px 15px 15px 15px;
+    }
+    
+    .winner-content p {
+        font-size: 8.5px;
+    }
+    
+    .winner-content .discount-msg {
+        font-size: 7.5px;
+    }
+    
+    .winner-content .discount-code {
+        font-size: 9.5px;
+    }
+    
+    .template-btn {
+        width: 85px;
+        height: 20px;
+    }
+    
+    .restart-btn-overlay {
+        bottom: 93px; /* Moved up 3px more for mobile */
+    }
+    
+    .menu-btn-overlay {
+        bottom: 63px; /* Moved up 3px more for mobile */
+    }
+    
+    /* Bloom Boss mobile adjustments */
+    .bloom-mode .winner-overlay {
+        transform: translateY(-20px); /* Slightly less on mobile */
+    }
+    
+    .bloom-mode .winner-content {
+        padding: 115px 15px 15px 15px; /* Lower copy by 15px on mobile */
+    }
+    
+    .bloom-mode .restart-btn-overlay {
+        bottom: 70px; /* Lower by 8px more from 78px on mobile */
+    }
+    
+    .bloom-mode .menu-btn-overlay {
+        bottom: 40px; /* Lower by 8px more from 48px on mobile */
+    }
+    
+    .bloom-mode .winner-content .website-link {
+        margin-top: 8px; /* Lower button by 10px on mobile (slightly less) */
+    }
+    
+    /* Glow Getter mobile adjustments */
+    .glow-mode .restart-btn-overlay {
+        bottom: 83px; /* Lower by 10px from 93px on mobile */
+    }
+    
+    .glow-mode .menu-btn-overlay {
+        bottom: 53px; /* Lower by 10px from 63px on mobile */
+    }
 }
 
 .joystick-tip {

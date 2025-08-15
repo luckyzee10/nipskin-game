@@ -340,6 +340,9 @@ function triggerLose(){
     const numSpan = document.getElementById('winnerNumber');
     if(numSpan){ window.getGlobalWinnerNumber().then(n=>{ numSpan.textContent = n; }); }
 
+    // Set the correct template image
+    window.setWinnerTemplate();
+
     // Dynamic reward copy
     const discountMsg = overlay.querySelector('.discount-msg');
     if(discountMsg){

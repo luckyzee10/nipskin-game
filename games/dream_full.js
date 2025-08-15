@@ -727,6 +727,9 @@ function gameOver() {
             window.getGlobalWinnerNumber().then(n => { numberSpan.textContent = n; });
         }
 
+        // Set the correct template image
+        window.setWinnerTemplate();
+
         // Update dynamic reward copy
         const discountMsg = overlay.querySelector('.discount-msg');
         if (discountMsg) {

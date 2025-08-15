@@ -189,6 +189,8 @@ async function launchBloom(){
   // Remove Glow-specific class if coming from Glow Getter
   document.body.classList.remove('glow-mode');
   document.body.classList.remove('dream-mode');
+  // Add Bloom Boss mode class
+  document.body.classList.add('bloom-mode');
 
   if (currentStop){ try{currentStop();}catch(e){} currentStop=null; }
   const row=document.getElementById('rowBloom');
@@ -396,6 +398,21 @@ window.getGlobalWinnerNumber = async function () {
   } catch (error) {
     console.error('Winner counter error:', error);
     return "1"; // Fallback
+  }
+};
+
+// -------- Winner template helper --------
+window.setWinnerTemplate = function() {
+  const templateImg = document.getElementById('winnerTemplate');
+  if (!templateImg) return;
+  
+  // Set template based on current game mode
+  if (document.body.classList.contains('dream-mode')) {
+    templateImg.src = 'assets/Winner screens/dreamcatcher_winner_screen.jpg';
+  } else if (document.body.classList.contains('glow-mode')) {
+    templateImg.src = 'assets/Winner screens/glowgetter_winner_screen.jpg';
+  } else if (document.body.classList.contains('bloom-mode')) {
+    templateImg.src = 'assets/Winner screens/bloomboss_winner_screen.jpg';
   }
 };
 

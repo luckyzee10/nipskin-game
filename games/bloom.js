@@ -168,6 +168,8 @@ function reset(){
   player.vx = 0;
   player.vy = 0;
   player.facingRight = true;
+  // Reset endGame flag so winner screen can show again
+  endGame.called = false;
   // Hide game-over overlay if visible
   const gov = document.getElementById('gameOver');
   if(gov) gov.classList.add('hidden');
@@ -432,6 +434,9 @@ function endGame(){
     const overlay = document.getElementById('winnerOverlay');
     const numSpan  = document.getElementById('winnerNumber');
     if(numSpan){ window.getGlobalWinnerNumber().then(n=>{ numSpan.textContent = n; }); }
+
+    // Set the correct template image
+    window.setWinnerTemplate();
 
     // Dynamic reward copy
     const discountMsg = overlay.querySelector('.discount-msg');
