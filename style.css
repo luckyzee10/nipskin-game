@@ -894,6 +894,23 @@ body.glow-mode .website-link:hover {
     bottom: 63px; /* Lower by 10px from 73px */
 }
 
+/* Glow Getter specific adjustments - move entire overlay up 70px */
+.glow-mode .winner-overlay {
+    transform: translateY(-70px); /* Move entire overlay up 70px */
+}
+
+.glow-mode .winner-content {
+    padding: 55px 20px 20px 20px; /* Adjust padding to compensate for moved overlay */
+}
+
+.glow-mode .restart-btn-overlay {
+    bottom: 178px; /* Move up 70px from 108px */
+}
+
+.glow-mode .menu-btn-overlay {
+    bottom: 143px; /* Move up 70px from 73px */
+}
+
 /* Mobile-specific adjustments */
 @media (max-width: 480px) {
     body.winner-mode .game-ui {
@@ -962,6 +979,23 @@ body.glow-mode .website-link:hover {
     
     .glow-mode .menu-btn-overlay {
         bottom: 53px; /* Lower by 10px from 63px on mobile */
+    }
+    
+    /* Glow Getter mobile overlay adjustments - move up 70px */
+    .glow-mode .winner-overlay {
+        transform: translateY(-70px); /* Move entire overlay up 70px on mobile */
+    }
+    
+    .glow-mode .winner-content {
+        padding: 50px 15px 15px 15px; /* Adjust padding to compensate for moved overlay */
+    }
+    
+    .glow-mode .restart-btn-overlay {
+        bottom: 163px; /* Move up 70px from 93px on mobile */
+    }
+    
+    .glow-mode .menu-btn-overlay {
+        bottom: 133px; /* Move up 70px from 63px on mobile */
     }
 }
 
