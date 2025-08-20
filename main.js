@@ -408,11 +408,11 @@ window.setWinnerTemplate = function() {
   
   // Set template based on current game mode
   if (document.body.classList.contains('dream-mode')) {
-    templateImg.src = 'assets/Winner screens/dreamcatcher_winner_screen.jpg';
+    templateImg.src = 'assets/winner screens/dreamcatcher_winner_screen.jpg';
   } else if (document.body.classList.contains('glow-mode')) {
-    templateImg.src = 'assets/Winner screens/glowgetter_winner_screen.jpg';
+    templateImg.src = 'assets/winner screens/glowgetter_winner_screen.jpg';
   } else if (document.body.classList.contains('bloom-mode')) {
-    templateImg.src = 'assets/Winner screens/bloomboss_winner_screen.jpg';
+    templateImg.src = 'assets/winner screens/bloomboss_winner_screen.jpg';
   }
 };
 
