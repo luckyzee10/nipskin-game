@@ -305,7 +305,7 @@ function update() {
         jumpCooldown--;
     }
     
-    // Primary jump when on ground
+    // Primary jump when on ground only - no double jump allowed
     if (keys.jump && player.onGround && !jumpPressed && jumpCooldown === 0) {
         player.velocityY = player.jumpPower;
         player.onGround = false;
@@ -320,45 +320,12 @@ function update() {
         }
     }
     
-    // Enhanced jump buffer system for lag tolerance
-    if (keys.jump && !player.onGround && jumpBuffer > 0 && !jumpPressed && jumpCooldown === 0) {
-        // More generous buffered jump - check if falling or near ground
-        let canBufferJump = false;
-        
-        // Allow buffered jump if falling
-        if (player.velocityY >= 0) {
-            canBufferJump = true;
-        }
-        
-        // Also allow if very close to any platform
-        platforms.forEach(platform => {
-            if (player.x < platform.x + platform.width &&
-                player.x + player.width > platform.x &&
-                player.y + player.height >= platform.y - 8 && // More generous proximity
-                player.y + player.height <= platform.y + 10) {
-                canBufferJump = true;
-            }
-        });
-        
-        if (canBufferJump) {
-            player.velocityY = player.jumpPower;
-            jumpBuffer = 0;
-            jumpPressed = true;
-            jumpCooldown = JUMP_COOLDOWN_FRAMES;
-            lastJumpTime = Date.now();
-            
-            // Play jump sound effect for buffered jump
-            if (window.audioManager) {
-                window.audioManager.playSFX('dreamchaser_jump');
-            }
-        }
-    }
+    // Remove buffered jump system - no double jumping allowed
+    // Only allow jump when on ground
     
-    // Enhanced jump buffer management
+    // Enhanced jump buffer management - simplified
     if (keys.jump && player.onGround) {
         jumpBuffer = jumpBufferTime; // Full buffer when on ground
-    } else if (keys.jump && !player.onGround && jumpBuffer === 0) {
-        jumpBuffer = jumpBufferTime; // Start buffer even if not on ground
     } else if (player.onGround) {
         jumpBuffer = 0; // Clear buffer when landing
     } else if (jumpBuffer > 0) {
@@ -517,6 +484,8 @@ function gameOver() {
 
         overlay.classList.remove('hidden');
         document.body.classList.add('winner-mode');
+        // Position game UI when winner screen shows
+        if(window.positionGameUI) window.positionGameUI();
         document.querySelector('.game-ui').style.display = 'block';
 
         const wr = document.getElementById('winnerRestartBtn');
@@ -537,6 +506,8 @@ function gameOver() {
     } else {
     finalScoreElement.textContent = score;
     gameOverDiv.classList.remove('hidden');
+    // Position game UI when game over screen shows
+    if(window.positionGameUI) window.positionGameUI();
     // Hide start button so only PLAY AGAIN shows
     startBtn.classList.add('hidden');
     document.querySelector('.game-ui').style.display = 'block';

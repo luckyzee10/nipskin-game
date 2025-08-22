@@ -426,6 +426,8 @@ function endGame(){
     overlay.classList.remove('hidden');
     document.querySelector('.game-ui').style.display = 'block';
     document.body.classList.add('winner-mode');
+    // Position game UI when winner screen shows
+    if(window.positionGameUI) window.positionGameUI();
 
     const wr = document.getElementById('winnerRestartBtn');
     const wm = document.getElementById('winnerMenuBtn');
@@ -435,7 +437,11 @@ function endGame(){
     const final=document.getElementById('finalScore');
     if(final) final.textContent=score;
     const gov=document.getElementById('gameOver');
-    if(gov) gov.classList.remove('hidden');
+    if(gov) {
+      gov.classList.remove('hidden');
+      // Position game UI when game over screen shows
+      if(window.positionGameUI) window.positionGameUI();
+    }
     const restart=document.getElementById('restartBtn');
     const menu=document.getElementById('menuBtn');
     if(restart){ restart.onclick = ()=>{ gov.classList.add('hidden'); reset(); startMainLoop(); }; }

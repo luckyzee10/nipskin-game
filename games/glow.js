@@ -338,6 +338,8 @@ function triggerLose(){
 
     overlay.classList.remove('hidden');
     document.body.classList.add('winner-mode');
+    // Position game UI when winner screen shows
+    if(window.positionGameUI) window.positionGameUI();
     document.querySelector('.game-ui').style.display = 'block';
 
     const wr = document.getElementById('winnerRestartBtn');
@@ -346,7 +348,12 @@ function triggerLose(){
     if(wm){ wm.onclick = ()=>{ document.body.classList.remove('winner-mode'); window.returnToMenu && window.returnToMenu(); }; }
   } else {
     const final=document.getElementById('finalScore'); if(final) final.textContent=score;
-    const gov=document.getElementById('gameOver'); if(gov) gov.classList.remove('hidden');
+    const gov=document.getElementById('gameOver'); 
+    if(gov) {
+      gov.classList.remove('hidden');
+      // Position game UI when game over screen shows
+      if(window.positionGameUI) window.positionGameUI();
+    }
     const restart=document.getElementById('restartBtn');
     const menu=document.getElementById('menuBtn');
     if(restart){ restart.onclick = ()=>{ gov.classList.add('hidden'); reset(); }; }

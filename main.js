@@ -103,12 +103,17 @@ function showWinnerFrame(){
   const frame = document.getElementById('winnerFrame');
   const canvas = document.getElementById('gameCanvas');
   if(!frame || !canvas) return;
-  const rect = canvas.getBoundingClientRect();
-  frame.style.position = 'fixed';
-  frame.style.left = `${rect.left}px`;
-  frame.style.top = `${rect.top}px`;
-  frame.style.width = `${rect.width}px`;
-  frame.style.height = `${rect.height}px`;
+  
+  // Use the same positioning logic as intro videos and start screens
+  const canvasRect = canvas.getBoundingClientRect();
+  const gameContainer = document.querySelector('.game-container');
+  const containerRect = gameContainer.getBoundingClientRect();
+  
+  frame.style.position = 'absolute';
+  frame.style.left = `${canvasRect.left - containerRect.left}px`;
+  frame.style.top = `${canvasRect.top - containerRect.top}px`;
+  frame.style.width = `${canvasRect.width}px`;
+  frame.style.height = `${canvasRect.height}px`;
   frame.classList.remove('hidden');
 }
 
@@ -216,6 +221,8 @@ async function launchBloom(){
     showGame(true);
     document.getElementById('gameOver').classList.add('hidden');
     document.getElementById('startBtn').classList.add('hidden');
+    // Position game UI relative to canvas
+    setTimeout(positionGameUI, 100); // Small delay to ensure canvas is rendered
     // Update header for Bloom Boss
     const header = document.querySelector('.game-header');
     header.style.display = 'block';
@@ -284,6 +291,8 @@ async function launchDream(){
 
   if(typeof mod.start==='function') mod.start();
   currentStop = typeof mod.stop==='function'? mod.stop : null;
+  // Position game UI relative to canvas
+  setTimeout(positionGameUI, 100); // Small delay to ensure canvas is rendered
 
   // Set Dream Chaser background immediately
   disableGameBG();
@@ -334,6 +343,8 @@ async function launchGlow(){
 
   if(typeof mod.start==='function') mod.start();
   currentStop = typeof mod.stop==='function'? mod.stop:null;
+  // Position game UI relative to canvas
+  setTimeout(positionGameUI, 100); // Small delay to ensure canvas is rendered
 
   // Set Glow Getter background immediately
   disableGameBG();
@@ -428,6 +439,119 @@ window.setWinnerTemplate = function() {
     templateImg.src = 'assets/winner screens/bloomboss_winner_screen.jpg';
   }
 };
+
+
+
+// -------- Position game UI using same logic as intro videos --------
+function positionGameUI() {
+  const gameUI = document.querySelector('.game-ui');
+  const canvas = document.getElementById('gameCanvas');
+  const gameContainer = document.querySelector('.game-container');
+  
+  if (!gameUI || !canvas || !gameContainer) return;
+  
+  // Check if game-over screen is visible
+  const gameOver = document.getElementById('gameOver');
+  const isGameOverVisible = gameOver && !gameOver.classList.contains('hidden');
+  
+  // Check if winner screen is visible
+  const winnerOverlay = document.getElementById('winnerOverlay');
+  const isWinnerVisible = winnerOverlay && !winnerOverlay.classList.contains('hidden');
+  
+  if (isGameOverVisible || isWinnerVisible) {
+    // For game-over or winner screen: use centering logic
+    const rect = canvas.getBoundingClientRect();
+    const containerRect = gameContainer.getBoundingClientRect();
+    
+    console.log('Game Over/Winner positioning debug:');
+    console.log('Canvas rect:', rect);
+    console.log('Container rect:', containerRect);
+    
+    // Calculate the center of the canvas area within the container
+    const canvasCenterX = (rect.left - containerRect.left) + (rect.width / 2);
+    const canvasCenterY = (rect.top - containerRect.top) + (rect.height / 2);
+    
+    console.log('Canvas center X:', canvasCenterX);
+    console.log('Canvas center Y:', canvasCenterY);
+    
+    // Position game-ui to be centered in the canvas area
+    gameUI.style.position = 'absolute';
+    gameUI.style.left = `${canvasCenterX}px`;
+    gameUI.style.top = `${canvasCenterY}px`;
+    gameUI.style.transform = 'translate(-50%, -50%)'; // Center the element on its position
+    gameUI.style.width = 'auto';
+    gameUI.style.height = 'auto';
+    gameUI.style.display = 'flex';
+    gameUI.style.alignItems = 'center';
+    gameUI.style.justifyContent = 'center';
+    gameUI.style.zIndex = '2000'; // Ensure it's above everything
+    
+    console.log('Applied styles:', {
+      position: gameUI.style.position,
+      left: gameUI.style.left,
+      top: gameUI.style.top,
+      transform: gameUI.style.transform,
+      width: gameUI.style.width,
+      height: gameUI.style.height
+    });
+    
+    // Reset any previous positioning on children to let flexbox work
+    const children = gameUI.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      if (!child.classList.contains('hidden')) {
+        // Remove any absolute positioning that interferes with flexbox
+        child.style.position = '';
+        child.style.left = '';
+        child.style.top = '';
+        child.style.transform = '';
+      }
+    }
+  } else {
+    // For other UI elements: use the original canvas-relative positioning
+    const canvasRect = canvas.getBoundingClientRect();
+    const containerRect = gameContainer.getBoundingClientRect();
+    
+    // Position game-ui to cover ONLY the canvas area, just like intro videos
+    gameUI.style.position = 'absolute';
+    gameUI.style.left = `${canvasRect.left - containerRect.left}px`;
+    gameUI.style.top = `${canvasRect.top - containerRect.top}px`;
+    gameUI.style.width = `${canvasRect.width}px`;
+    gameUI.style.height = `${canvasRect.height}px`;
+    gameUI.style.display = 'flex';
+    gameUI.style.alignItems = 'center';
+    gameUI.style.justifyContent = 'center';
+    gameUI.style.transform = '';
+    gameUI.style.zIndex = '10';
+    
+    // Reset any previous positioning on children to let flexbox work
+    const children = gameUI.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      if (!child.classList.contains('hidden')) {
+        // Remove any absolute positioning that interferes with flexbox
+        child.style.position = '';
+        child.style.left = '';
+        child.style.top = '';
+        child.style.transform = '';
+      }
+    }
+  }
+}
+
+// Make positionGameUI available globally so games can call it
+window.positionGameUI = positionGameUI;
+
+// Add window resize listener to update positioning
+window.addEventListener('resize', () => {
+  // Debounce the resize event to avoid excessive calls
+  clearTimeout(window.resizeTimeout);
+  window.resizeTimeout = setTimeout(() => {
+    if (window.positionGameUI) {
+      window.positionGameUI();
+    }
+  }, 100);
+});
 
 // -------- Audio System --------
 class AudioManager {

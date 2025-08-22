@@ -24,7 +24,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh; /* allow page scroll beyond first viewport */
+    min-height: 100vh; /* Use min-height instead of height to allow content to determine size */
     padding: 10px 10px 80px 10px; /* space for controls */
     max-width: 400px;
     margin: 0 auto;
@@ -86,12 +86,10 @@ body {
 }
 
 .game-controls {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative; /* Change from absolute to relative for normal flow */
+    margin-top: 10px; /* Reduced from 20px to bring controls closer */
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Center the controls container */
     width: 90%;
     max-width: 380px;
     gap: 10px;
@@ -101,6 +99,10 @@ body {
     border-radius: 15px;
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255, 255, 255, 0.4);
+    /* Ensure controls stay within the game container bounds */
+    max-height: 80px; /* Prevent controls from being too tall */
+    margin-left: auto; /* Center the container */
+    margin-right: auto; /* Center the container */
 }
 
 .control-btn {
@@ -144,18 +146,9 @@ body {
 }
 
 .game-ui {
-    position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     text-align: center;
     z-index: 10;
-    width: auto;
-}
-
-/* Move winner overlay down by ~50px */
-body.winner-mode .game-ui {
-    top: 42%;
+    /* Position and size will be set by JavaScript using same logic as intro videos */
 }
 
 .start-btn, .restart-btn {
@@ -170,6 +163,11 @@ body.winner-mode .game-ui {
     cursor: pointer;
     transition: all 0.1s;
     animation: pulse 2s ease-in-out infinite;
+}
+
+/* Hide the old START GAME button */
+.start-btn {
+    display: none !important; /* Always hide the START GAME button */
 }
 
 @keyframes pulse {
@@ -187,8 +185,13 @@ body.winner-mode .game-ui {
     border: 3px solid #4169e1;
     border-radius: 12px;
     color: #2c3e50;
-    max-width: 272px !important;
-    width: 272px !important;
+    /* Remove fixed width constraints - let it be responsive like instructions */
+    max-width: 85%; /* Responsive max-width like instructions */
+    width: auto; /* Let content determine width */
+    min-width: 280px; /* Minimum readable width */
+    /* Let flexbox handle the sizing naturally */
+    flex-shrink: 0; /* Prevent shrinking */
+    flex-grow: 0; /* Don't grow beyond content size */
 }
 
 /* Dream Chaser - Pastel Pink */
@@ -245,6 +248,20 @@ body.winner-mode .game-ui {
 /* Website link in game over screen should match button width */
 .game-over .website-link {
     width: 136px !important;
+}
+
+/* Responsive button sizing for different screen sizes */
+@media (max-width: 480px) {
+    .game-over .restart-btn {
+        width: 120px !important; /* Slightly smaller on mobile */
+        font-size: 9px;
+        padding: 10px 16px;
+    }
+    
+    .game-over .website-link {
+        width: 120px !important; /* Match button width */
+        font-size: 7px; /* Smaller font on mobile */
+    }
 }
 
 .hidden {
@@ -445,9 +462,24 @@ body.winner-mode .game-ui {
     }
     
     .game-controls {
-        bottom: 5px;
+        margin-top: 8px; /* Reduced from 15px to bring controls closer on mobile */
         width: 95%;
         padding: 8px;
+    }
+    
+    /* Mobile responsive game-over screen */
+    .game-over {
+        max-width: 90%; /* Slightly larger on mobile for better readability */
+        min-width: 260px; /* Smaller minimum on mobile */
+        padding: 16px; /* Slightly less padding on mobile */
+    }
+    
+    .game-over h2 {
+        font-size: 16px; /* Slightly smaller on mobile */
+    }
+    
+    .game-over p {
+        font-size: 12px; /* Slightly smaller on mobile */
     }
 }
 
@@ -463,7 +495,7 @@ canvas {
 /* Safe area for phones with home indicators */
 @supports (padding: max(0px)) {
     .game-controls {
-        bottom: max(10px, env(safe-area-inset-bottom));
+        margin-bottom: max(10px, env(safe-area-inset-bottom));
         padding-bottom: max(10px, env(safe-area-inset-bottom));
     }
 }
@@ -792,10 +824,13 @@ body.glow-mode .website-link:hover {
 
 .winner-overlay {
     position: relative;
-    width: 300px; /* Reduced from 340px to give margin */
-    height: 440px; /* Reduced proportionally */
-    max-width: 85vw;
-    max-height: 85vh;
+    /* Remove fixed dimensions - let it size naturally like game-over screen */
+    width: auto;
+    height: auto;
+    max-width: 85%;
+    max-height: 85%;
+    min-width: 280px; /* Minimum readable width */
+    min-height: 400px; /* Minimum readable height */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -822,7 +857,7 @@ body.glow-mode .website-link:hover {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 125px 20px 20px 20px; /* Reduced top padding by 10px */
+    padding: 125px 20px 20px 20px;
     box-sizing: border-box;
     color: #191970;
     text-align: center;
@@ -865,7 +900,7 @@ body.glow-mode .website-link:hover {
     border: 2px solid #5F9EA0;
     transition: all 0.2s ease;
     transform: scale(0.8); /* Make it 20% smaller overall */
-    margin-top: 0px; /* Reset button position */
+    margin-top: -10px; /* Move link up by 10px */
 }
 
 .winner-content .website-link:hover {
@@ -902,7 +937,7 @@ body.glow-mode .website-link:hover {
 
 /* Bloom Boss specific adjustments */
 .bloom-mode .winner-overlay {
-    transform: translateY(-55px); /* Move entire overlay up 30px more (from -25px to -55px) */
+    /* Removed transform - now handled by JavaScript */
 }
 
 .bloom-mode .winner-content {
@@ -919,7 +954,12 @@ body.glow-mode .website-link:hover {
 }
 
 .bloom-mode .winner-content .website-link {
-    margin-top: 20px; /* Move link button up 10px more from 30px */
+    margin-top: 5px; /* Move link button up 10px more from 30px */
+}
+
+/* Bloom Boss back button positioning - move it 10px higher */
+.bloom-mode .back-btn {
+    top: 22px; /* Move back button 10px higher (was 32px) */
 }
 
 /* Glow Getter specific button positioning */
@@ -933,7 +973,7 @@ body.glow-mode .website-link:hover {
 
 /* Glow Getter specific adjustments - move entire overlay up 30px */
 .glow-mode .winner-overlay {
-    transform: translateY(-30px); /* Move entire overlay up 30px */
+    /* Removed transform - now handled by JavaScript */
 }
 
 .glow-mode .winner-content {
@@ -949,12 +989,12 @@ body.glow-mode .website-link:hover {
 }
 
 .glow-mode .winner-content .website-link {
-    margin-top: 12px; /* Move link button down 12px */
+    margin-top: 2px; /* Move link button up by 10px (was 12px) */
 }
 
 /* Dream Chaser specific adjustments - move entire overlay up 25px */
 .dream-mode .winner-overlay {
-    transform: translateY(-25px); /* Move entire overlay up 25px */
+    /* Removed transform - now handled by JavaScript */
 }
 
 .dream-mode .winner-content {
@@ -970,14 +1010,12 @@ body.glow-mode .website-link:hover {
 }
 
 .dream-mode .winner-content .website-link {
-    margin-top: 10px; /* Move link button up 5px more from 15px */
+    margin-top: -8px; /* Move link button up by 8px more (was 0px) */
 }
 
 /* Mobile-specific adjustments */
 @media (max-width: 480px) {
-    body.winner-mode .game-ui {
-        top: 45%;
-    }
+    /* Game UI positioning handled by JavaScript */
     
     .winner-overlay {
         width: 280px;
