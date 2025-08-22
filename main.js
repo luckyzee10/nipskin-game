@@ -138,13 +138,19 @@ async function playIntro(src){
     skipBtn.addEventListener('click', finish, {once:true});
     video.addEventListener('ended', finish, {once:true});
     video.addEventListener('error', finish, {once:true});
-    // Position overlay to cover the canvas area (centre on canvas)
+    // Position overlay to cover ONLY the canvas area, not the buttons below
     const canvasRect = document.getElementById('gameCanvas').getBoundingClientRect();
-    overlay.style.position = 'fixed';
-    overlay.style.left = `${canvasRect.left}px`;
-    overlay.style.top = `${canvasRect.top}px`;
+    const gameContainer = document.querySelector('.game-container');
+    const containerRect = gameContainer.getBoundingClientRect();
+    
+    // Use absolute positioning relative to game container to prevent scroll misalignment
+    overlay.style.position = 'absolute';
+    overlay.style.left = `${canvasRect.left - containerRect.left}px`;
+    overlay.style.top = `${canvasRect.top - containerRect.top}px`;
     overlay.style.width = `${canvasRect.width}px`;
     overlay.style.height = `${canvasRect.height}px`;
+    overlay.style.overflow = 'hidden'; // Prevent any content from spilling out
+    // Ensure video doesn't overlap with control buttons below
     overlay.classList.remove('hidden');
     overlay.style.background='#000';
     video.style.width = '100%';
@@ -175,12 +181,19 @@ async function showStartScreen(src){
       resolve();
     };
     overlay.addEventListener('click', click);
-    // position overlay over canvas
+    // position overlay over canvas (not overlapping buttons)
     const rect = document.getElementById('gameCanvas').getBoundingClientRect();
-    overlay.style.left = `${rect.left}px`;
-    overlay.style.top  = `${rect.top}px`;
+    const gameContainer = document.querySelector('.game-container');
+    const containerRect = gameContainer.getBoundingClientRect();
+    
+    // Use absolute positioning relative to game container to prevent scroll misalignment
+    overlay.style.position = 'absolute';
+    overlay.style.left = `${rect.left - containerRect.left}px`;
+    overlay.style.top  = `${rect.top - containerRect.top}px`;
     overlay.style.width = `${rect.width}px`;
     overlay.style.height= `${rect.height}px`;
+    overlay.style.overflow = 'hidden'; // Prevent any content from spilling out
+    // Ensure start screen doesn't overlap with control buttons below
     overlay.classList.remove('hidden');
   });
 }
@@ -217,7 +230,7 @@ async function launchBloom(){
     document.getElementById('gameCanvas').height = 500;
 
     // Play Bloom Boss intro video then start screen
-    await playIntro('assets/videos/bloom%20boss%20video%202.mp4');
+  await playIntro('assets/videos/bloomboss_optimized.mp4');
     await showStartScreen('assets/start screens/bloom_boss_pop_up_new.png');
 
     currentStop = typeof mod.stop==='function'? mod.stop: null;
@@ -264,7 +277,7 @@ async function launchDream(){
   document.getElementById('jumpBtn').innerText = 'JUMP!';
 
   // Play intro video, then show start screen for Dream Chaser
-  await playIntro('assets/videos/dream_chaser_adjusted_video.mp4');
+  await playIntro('assets/videos/dreamchaser_optimized.mp4');
   await showStartScreen('assets/start screens/dream_catcher_pop_up_new.png');
 
   const mod = await modPromise;
@@ -316,7 +329,7 @@ async function launchGlow(){
   document.getElementById('jumpBtn').innerText = 'SHOOT!';
 
   // Play Glow Getter intro video then start screen
-  await playIntro('assets/videos/GLOW%20GETTER%20video%202.mp4');
+  await playIntro('assets/videos/glowgetter_optimized.mp4');
   await showStartScreen('assets/start screens/glow_getter_pop_up_new.png');
 
   if(typeof mod.start==='function') mod.start();
@@ -383,7 +396,7 @@ window.getGlobalWinnerNumber = async function () {
   
   try {
     console.log('Calling winner counter API...');
-    const res = await fetch(
+  const res = await fetch(
       "https://winner-counter.luckyzee.workers.dev/increment",
       { method: "POST" }
     );
@@ -626,10 +639,17 @@ function initBackgroundAudioControl() {
 }
 
 // ensure menu visible on load
+// -------- Orientation Lock System --------
+function initOrientationLock() {
+    console.log('Orientation lock disabled for testing - letting CSS handle it');
+    // Disabled for testing - let CSS handle orientation detection
+}
+
 window.addEventListener('DOMContentLoaded', ()=>{
   showGame(false);
   mainMenu.style.display='flex';
   initAudioToggle();
   initMobileAudio();
   initBackgroundAudioControl();
+  initOrientationLock();
 }); 

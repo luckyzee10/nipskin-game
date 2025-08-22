@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="screen-orientation" content="portrait">
+    <meta name="x5-orientation" content="portrait">
+    <meta name="full-screen" content="yes">
+    <meta name="browsermode" content="application">
     <title>Nipskin Game - Shine Up!</title>
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
     <div class="game-container">
@@ -83,7 +87,7 @@
 
         <!-- Dream Chaser intro video overlay -->
         <div id="introOverlay" class="intro-overlay hidden">
-            <video id="introVideo" class="intro-video" src="assets/videos/dream_chaser_adjusted_video.mp4" playsinline></video>
+            <video id="introVideo" class="intro-video" src="assets/videos/dreamchaser_optimized.mp4" playsinline></video>
             <button id="skipIntro" class="skip-intro-btn">SKIP</button>
         </div>
 
@@ -102,6 +106,16 @@
 
     </div>
     
-    <script type="module" src="main.js?v=4"></script>
+    <!-- Landscape orientation warning overlay -->
+    <div id="orientationWarning" class="orientation-warning">
+        <div class="orientation-content">
+            <div class="phone-icon">📱</div>
+            <h2>Por Favor Rota Tu Dispositivo</h2>
+            <p>Este juego funciona mejor en modo vertical</p>
+            <p>Por favor rota tu teléfono para continuar jugando</p>
+        </div>
+    </div>
+    
+    <script type="module" src="main.js?v=5"></script>
 </body>
 </html> 

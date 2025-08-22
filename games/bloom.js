@@ -35,21 +35,7 @@ const imgFlower  = new Image(); imgFlower.src='sprites/new flower sprite.png';
 const imgCactus  = new Image(); imgCactus.src='sprites/new cactus sprite.png';
 const imgBasket  = new Image(); imgBasket.src='sprites/basket.png';
 
-// background pattern (loaded from asset)
-const imgBg = new Image(); imgBg.src='assets/bloom-boss-background.png';
-let fieldPattern = null;
-const PATTERN_SCALE = 0.5; // zoom out to 50%
-imgBg.onload = () => {
-  if(ctx){ 
-    fieldPattern = ctx.createPattern(imgBg,'repeat');
-    if(fieldPattern && fieldPattern.setTransform){
-      const m = new DOMMatrix();
-      m.a = PATTERN_SCALE; // scale x
-      m.d = PATTERN_SCALE; // scale y
-      fieldPattern.setTransform(m);
-    }
-  }
-};
+// Background pattern removed - CSS handles background
 
 // controls
 const keys = {left:false,right:false,up:false,down:false};
@@ -201,16 +187,7 @@ function start(){
   document.addEventListener('keydown',keyDown);
   document.addEventListener('keyup',keyUp);
 
-  // create pattern if background already loaded
-  if(!fieldPattern && imgBg.complete){
-    fieldPattern = ctx.createPattern(imgBg,'repeat');
-    if(fieldPattern && fieldPattern.setTransform){
-      const m = new DOMMatrix();
-      m.a = PATTERN_SCALE;
-      m.d = PATTERN_SCALE;
-      fieldPattern.setTransform(m);
-    }
-  }
+  // Background pattern creation removed - CSS handles background
 
   // ---------- On-screen joystick ----------
   const joy=document.getElementById('bloomJoystick');
@@ -389,9 +366,7 @@ function update(){
 
 function render(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  // Background disabled - using CSS background instead
-  // ctx.fillStyle = fieldPattern || '#5abf41';
-  // ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Background removed - CSS handles background
   // draw flowers
   const halfF=FLOWER_SIZE/2;
   flowers.forEach(f=>ctx.drawImage(imgFlower,f.x-halfF,f.y-halfF,FLOWER_SIZE,FLOWER_SIZE));

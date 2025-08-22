@@ -24,9 +24,7 @@ const DIAMOND_SPEED = 0.9;         // vertical speed of stars (px per frame)
 const ENEMY_SPAWN_INTERVAL = 90;   // frames between meteor spawns (was 60)
 const DIAMOND_SPAWN_INTERVAL = 200;// frames between star spawns (was 150)
 
-// Star field
-const STAR_COUNT = 120;
-const stars = [];
+// Star field removed - CSS handles background
 
 // Life system
 const MAX_LIFE = 100;
@@ -139,11 +137,7 @@ function reset(){
   bullets.length=0; enemies.length=0; diamonds.length=0;
   score=0; gameOver=false;
   life = MAX_LIFE;
-  // init stars
-  stars.length=0;
-  for(let i=0;i<STAR_COUNT;i++){
-    stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,alpha:Math.random(),speed:0.002+Math.random()*0.003});
-  }
+  // Star field initialization removed - CSS handles background
   updateScore();
 }
 function updateScore(){
@@ -160,11 +154,7 @@ function loop(){
 let frame=0;
 function update(){
   if(gameOver) return;
-  // update star twinkle
-  stars.forEach(s=>{
-    s.alpha += s.speed;
-    if(s.alpha>1 || s.alpha<0){ s.speed*=-1; s.alpha = Math.max(0,Math.min(1,s.alpha)); }
-  });
+  // Star twinkling removed - CSS handles background
   // Player movement
   player.vx=0;
   if(keys.left){ player.vx=-player.speed; player.facingRight=false; }
@@ -260,14 +250,7 @@ function update(){
 
 function render(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  // Background disabled - using CSS background instead
-  // ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  // draw stars
-  stars.forEach(s=>{
-    ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
-    ctx.fillRect(s.x,s.y,2,2);
-  });
+  // Background and stars removed - CSS handles background
 
   // draw diamonds behind enemies for depth
   diamonds.forEach(d=> ctx.drawImage(imgDiamond,d.x,d.y,DIAMOND_W,DIAMOND_H));
